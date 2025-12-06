@@ -42,7 +42,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       // Capitalize first letter of each word
       order.buyer.name = emailName
         .split(/[._-]/)
-        .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(" ")
     }
     await order.save()

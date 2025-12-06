@@ -136,48 +136,6 @@ export default function ProcessFlowSection() {
     }
   }
 
-  const handleSaveSubmission = async () => {
-    if (!name || !email || !phone || scriptText.length < 10 || !orderId) {
-      setError("Please fill all required fields and ensure script is at least 10 characters")
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-
-    try {
-      const response = await fetch(`/api/v1/orders/${orderId}/submission`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          scriptText,
-          greenScreen,
-          email,
-          phone,
-          name,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (data.submissionId) {
-        setSubmissionId(data.submissionId)
-        setCompletedSteps([1, 2])
-        setCurrentStep(3)
-        // Scroll to step 3
-        setTimeout(() => {
-          sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-        }, 100)
-      } else {
-        setError(data.error || "Failed to save submission")
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to save submission")
-    } finally {
-      setLoading(false)
-    }
-  }
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFiles = Array.from(e.target.files || [])
     const validFiles = selectedFiles.filter((file) => {
@@ -255,7 +213,9 @@ export default function ProcessFlowSection() {
 
           const formData = new FormData()
           formData.append("file", file)
-          formData.append("submissionId", currentSubmissionId)
+          if (currentSubmissionId) {
+            formData.append("submissionId", currentSubmissionId)
+          }
 
           const uploadResponse = await fetch("/api/v1/uploads/upload-video", {
             method: "POST",
@@ -297,7 +257,7 @@ export default function ProcessFlowSection() {
       console.log(`Upload complete: ${successfulUploads.length} successful, ${uploadErrors.length} failed`)
       
       // Return the submissionId so it can be used immediately
-      return currentSubmissionId
+      return currentSubmissionId || undefined
     } catch (err: any) {
       console.error("Upload error:", err)
       setError(err.message || "Failed to upload files")
