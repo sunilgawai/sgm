@@ -176,8 +176,9 @@ export default function HomePage() {
             viewport={{ once: true, margin: "-100px" }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">Our Services</h2>
-            <p className="text-xl text-gray-700">Everything you need to create professional video content</p>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Our Services</h2>
+            <p className="text-xl text-gray-300">Everything you need to create professional video content</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
