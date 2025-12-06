@@ -37,7 +37,7 @@ export default function Header() {
     <motion.header
       // Set header background to the solid caramel color.
       // ✨ MODIFIED: Removed 'shadow-[0_8px_30px_rgba(0,0,0,0.25)]' and 'backdrop-blur-sm'
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 overflow-visible ${isScrolled
         ? `bg-[${HEADER_COLOR}]/95` // Translucent color only
         : `bg-[${HEADER_COLOR}]` // Solid color when at the top
         }`}
@@ -45,12 +45,11 @@ export default function Header() {
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between overflow-visible">
         {/* Logo */}
         <Link href="/" className="flex-shrink-0">
           <motion.div
-            // NOTE: Removed 'left-[-100px]' to fix logo positioning based on previous instructions.
-            className="flex relative items-center gap-2 text-white relative left-[-100px]"
+            className="flex relative items-center gap-2 text-white"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -62,8 +61,7 @@ export default function Header() {
         {/* CTA Button: Updated to match screenshot style and hover text color */}
         <Link href="/ai-clone#process-flow">
           <motion.button
-            // NOTE: Removed 'relative left-[100px]' to fix button positioning based on previous instructions.
-            className={`hidden md:inline-flex items-center justify-center ml-auto px-12 py-2 bg-white text-[#111] rounded-full font-semibold shadow-lg transition-all duration-300 hover:text-[${TEXT_HOVER_COLOR}] hover:scale-105 relative left-[100px]` }
+            className={`hidden md:inline-flex items-center justify-center ml-auto px-12 py-2 bg-white text-[#111] rounded-full font-semibold shadow-lg transition-all duration-300 hover:text-[${TEXT_HOVER_COLOR}] hover:scale-105` }
             whileHover={{
               scale: 1.05,
               // White glowing shadow on hover

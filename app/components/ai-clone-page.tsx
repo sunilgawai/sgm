@@ -204,29 +204,16 @@ export default function AiClonePage() {
       {/* ================= FIXED HERO SECTION ================= */}
       <section className="relative bg-[#C89356] overflow-visible z-0 pt-6 pb-25 rounded-b-[80px] md:rounded-b-[120px]">
 
-        {/* Top Navigation */}
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between py-4">
-            <img src="/logo-white.png" alt="Signature" className="w-36" />
-
-            <button
-              onClick={routeToProcessFlow}
-              className="hidden sm:block bg-white text-[#111] px-6 py-3 rounded-full font-semibold shadow-xl hover:scale-[1.02] transition"
-            >
-              Get Your AI Clone
-            </button>
-          </div>
-        </div>
 
         {/* HEADINGS */}
         <div className="text-center max-w-4xl mx-auto px-6">
-          <p className="text-white/95 text-lg mb-4 font-bold">No camera. No editing. No tech skills.</p>
+          <p className="text-white/95 text-sm mb-3 font-bold">No camera. No editing. No tech skills.</p>
 
-          <h1 className="text-white text-2xl md:text-3xl  drop-shadow-xl leading-3">
+          <h1 className="text-white text-xl md:text-2xl  drop-shadow-xl leading-tight">
             Create Your AI Clone
           </h1>
 
-          <p className="text-[#0b0b0b] text-md md:text-3xl font-semibold mt-3 mb-10 leading-none">
+          <p className="text-[#0b0b0b] text-sm md:text-xl font-semibold mt-2 mb-6 leading-none">
             In Just 30 mins
           </p>
         </div>
@@ -267,7 +254,7 @@ export default function AiClonePage() {
         {/* Real Estate Section */}
         <div className="mt-12 text-center max-w-4xl mx-auto px-6">
           <motion.h2
-            className="text-white  text-md md:text-md lg:text-lg leading-tight mb-8 drop-shadow-lg"
+            className="text-white text-sm md:text-base leading-tight mb-6 drop-shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -275,12 +262,12 @@ export default function AiClonePage() {
           >
             Real Estate Agents Are<br/> Using AI To Get
             <br />
-            <span className="text-md md:text-2xl lg:text-3xl text-black font-medium">3x More Luxury Listings</span>
+            <span className="text-base md:text-xl text-black font-medium">3x More Luxury Listings</span>
           </motion.h2>
 
           <motion.button
             onClick={() => setIsPurchaseOpen(true)}
-            className="bg-white text-black rounded-full px-6 py-4 font-semibold text-lg shadow-[0_20px_60px_rgba(0,0,0,0.3)] hover:scale-[1.03] transition"
+            className="bg-white text-black rounded-full px-5 py-3 font-semibold text-base shadow-[0_20px_60px_rgba(0,0,0,0.3)] hover:scale-[1.03] transition"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
@@ -304,9 +291,9 @@ export default function AiClonePage() {
       </section>
       {/* ================= END HERO SECTION ================= */}
 
-      <section className="w-full py-20 bg-black flex flex-col items-center">
+      <section className="w-full py-12 bg-black flex flex-col items-center">
         {/* Title */}
-        <h2 className="text-2xl md:text-2xl  text-white mb-14">
+        <h2 className="text-xl md:text-2xl  text-white mb-10">
           Our AI <span className="text-[#D7A059] font-medium">Clones</span>
         </h2>
 
@@ -364,22 +351,26 @@ export default function AiClonePage() {
       </section>
 
       {/* Compare Options Section (adjusted widths/heights & subtler accents) */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-12"
+            className="text-center mb-8"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-2xl md:text-3xl font-medium text-gray-900 mb-4">
-              Compare Your <span className="text-[#C89356] font-semibold">Options</span>
-            </h2>
-            <p className="text-xl text-gray-700">See why 500+ agents choose the smart way.</p>
+            <div className="flex flex-col items-center mb-3">
+              <h2 className="text-3xl md:text-4xl text-gray-900">
+                Compare Your
+              </h2>
+              <h2 className="text-3xl md:text-4xl text-[#C89356] -mt-2">
+                Options
+              </h2>
+            </div>
+            <p className="text-base text-gray-700">See why 500+ agents choose the smart way.</p>
           </motion.div>
-<div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto max-w-[1280px] items-start">
-  {/* CARD TEMPLATE WRAPPER APPLIED CONSISTENTLY */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mx-auto max-w-5xl items-stretch">
   {[
     {
       title: "OLD WAY",
@@ -397,7 +388,13 @@ export default function AiClonePage() {
       tag: "Time Sink",
       icon: AlertTriangle,
       colorText: "text-gray-900",
-      list: ["100+ hours learning", "Software subscriptions", "Online courses", "Months to learn", "Still looks amateur"],
+      list: [
+        "100+ hours learning",
+        "Software subscriptions",
+        "Online courses",
+        "Months to learn",
+        "Still looks amateur",
+      ],
       footer: <>Time = Money Lost</>,
       highlight: false,
     },
@@ -419,127 +416,137 @@ export default function AiClonePage() {
   ].map((card, idx) => (
     <motion.div
       key={idx}
-      className={`relative rounded-2xl  ${
-        card.highlight
-          ? "border-2 border-green-600 bg-gradient-to-b from-emerald-500 to-emerald-600 text-white"
-          : "border border-gray-200 bg-white text-gray-900"
-      }  grid grid-rows-[auto,1fr,auto] min-h-[520px]`}
+      className={`
+        relative h-full
+        ${card.highlight
+          ? "rounded-[38px] bg-[#00B569] text-white shadow-[0_26px_70px_rgba(0,0,0,0.30)] ring-1 ring-black/5"
+          : "rounded-[38px] bg-white text-gray-900 shadow-[0_22px_60px_rgba(0,0,0,0.18)] ring-1 ring-black/5"}
+      `}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: idx * 0.07 }}
       viewport={{ once: true }}
-    >{/* BADGE EXACT PLACEMENT */}
+    >
+      {/* badge - top right */}
       <div
-        className={`absolute -top-4 left-1/2 z-10 -translate-x-1/2 ${
-          card.highlight ? "bg-[#FCD34D] text-gray-900" : "bg-[#C89356] text-white"
-        } px-4 py-1 rounded-full text-sm font-semibold`}
+        className={`absolute -top-4 right-4 z-20 px-4 py-1 rounded-full text-xs font-semibold shadow-md
+        ${card.highlight ? "bg-[#F4B547] text-black" : "bg-[#C89356] text-white"}`}
       >
         {card.tag}
       </div>
-      <div className="relative h-full w-full rounded-2xl overflow-hidden p-8">
-        
 
-     {/* GOLD CORNER, non-highlight only */}
-{!card.highlight && (
-  <div
-    aria-hidden
-    className="absolute -top-4 -right-4 w-[180px] h-[160px] rounded-full opacity-70
-               bg-gradient-to-bl from-[#F5D8B0] via-[#F3D5AD] to-transparent blur-xl pointer-events-none"
-  />
-)}
-
-
-      {/* HEADER */}
-      <div className="text-center mt-6 mb-6 flex flex-col items-center">
-        <div className="flex items-center justify-center gap-3 mb-3">
+      {/* inner card: fixed height + flex column */}
+      <div className="relative flex flex-col h-full px-6 pt-8 pb-6 max-w-[360px] mx-auto">
+        {/* golden gradient in upper right corner only */}
+        {!card.highlight && (
           <div
-            className={`w-12 h-12 rounded-full ${
-              card.highlight ? "bg-white/20" : "bg-gray-100"
-            } flex items-center justify-center`}
-          >
-            <card.icon size={24} className={card.highlight ? "text-white" : "text-gray-700"} />
-          </div>
-          <h3 className={`text-xl font-semibold tracking-wide ${card.colorText}`}>{card.title}</h3>
-        </div>
-
-        <p
-          className={`text-lg font-medium italic ${
-            card.highlight ? "text-white/90" : "text-gray-600"
-          }`}
-        >
-          {idx === 0 ? "Hire Videographer" : idx === 1 ? "Learn Video Editing" : "AgentClone AI"}
-        </p>
-
-        {/* PRICING BOX EXACT DIMENSIONS */}
-        <div
-          className={`rounded-xl py-5 mb-6 w-[230px] shadow-inner ${
-            card.highlight ? "bg-emerald-600" : "bg-gray-100"
-          }`}
-        >
-          <div className={`text-4xl md:text-5xl font-bold ${card.colorText}`}>{card.price}</div>
-        </div>
-      </div>
-
-      {/* FEATURES */}
-      <ul
-        className={`space-y-3 text-sm leading-relaxed ${
-          card.highlight ? "text-white" : "text-gray-700"
-        } mx-auto w-[230px]`}
-      >
-        {card.list.map((txt, i) => (
-          <li key={i} className="flex gap-3">
-            <div
-              className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                card.highlight ? "bg-white/20" : "bg-gray-200"
-              }`}
-            >
-              {card.highlight ? (
-                <Check size={12} className="text-white" />
-              ) : (
-                <XIcon size={12} className="text-gray-700" />
-              )}
-            </div>
-            {txt}
-          </li>
-        ))}
-      </ul>
-
-      {/* FOOTER */}
-      <div
-        className={`pt-6 mt-8 border-t text-center text-sm ${
-          card.highlight ? "border-emerald-500 text-white/90" : "border-gray-200 text-gray-600"
-        }`}
-      >
-        {card.footer}
-
-        {/* CTA ONLY ON LAST CARD EXACT MATCH */}
-        {card.highlight && (
-          <button
-            className="mt-6 w-full py-4 rounded-full text-black font-semibold text-lg flex items-center justify-center gap-3 shadow-lg"
+            aria-hidden
+            className="pointer-events-none absolute top-0 right-0 w-32 h-32 opacity-60"
             style={{
-              background:
-                "linear-gradient(90deg,#f7c361 0%, #f1a23a 50%, #e28f2c 100%)",
-              boxShadow:
-                "0 10px 24px rgba(0,0,0,0.12), inset 0 6px 18px rgba(255,255,255,0.08)",
+              background: "radial-gradient(circle at top right, rgba(245,216,176,0.8), transparent 70%)",
             }}
-          >
-            <span>Get Your AI Clone At $37</span>
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22">
-              <path
-                d="M5 12h14M13 5l6 7-6 7"
-                stroke="#111827"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+          />
         )}
-      </div>
+
+         {/* HEADER - Top Left */}
+         <div className="relative text-left mb-3">
+           <div className="flex items-center gap-3">
+             <div
+               className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0
+               ${card.highlight ? "bg-white/20" : "bg-gray-100"}`}
+             >
+               <card.icon
+                 size={28}
+                 className={card.highlight ? "text-white" : "text-gray-700"}
+               />
+             </div>
+             <div className="flex flex-col">
+               <p
+                 className={`text-sm font-semibold tracking-wide
+                 ${card.highlight ? "text-white/90" : "text-gray-700"}`}
+               >
+                 {card.title}
+               </p>
+               <p
+                 className={`text-xs italic
+                 ${card.highlight ? "text-white/80" : "text-gray-600"}`}
+               >
+                 {idx === 0 ? "Hire Videographer" : idx === 1 ? "Learn Video Editing" : "AgentClone AI"}
+               </p>
+             </div>
+           </div>
+ 
+           {/* PRICE PILL */}
+           <div
+             className={`w-full rounded-xl py-4 flex items-center justify-center shadow-inner
+             ${card.highlight ? "bg-[#009654]" : "bg-[#F4F4F6]"}`}
+           >
+             <span
+               className={`text-2xl font-semibold
+               ${card.highlight ? "text-white" : "text-gray-900"}`}
+             >
+               {card.price}
+             </span>
+           </div>
+         </div>
+ 
+         {/* FEATURES – flex-1 so footer sticks to bottom */}
+         <ul
+           className={`relative mt-4 space-y-2 text-xs leading-relaxed flex-1
+           ${card.highlight ? "text-white" : "text-gray-700"}`}
+         >
+           {card.list.map((txt, i) => (
+             <li key={i} className="flex items-start gap-2.5">
+               <div
+                 className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5
+                 ${card.highlight ? "bg-white/20" : "bg-[#F2F3F5]"}`}
+               >
+                 {card.highlight ? (
+                   <Check className="w-3 h-3 text-white" />
+                 ) : (
+                   <XIcon className="w-3 h-3 text-gray-500" />
+                 )}
+               </div>
+               <span>{txt}</span>
+             </li>
+           ))}
+         </ul>
+ 
+         {/* FOOTER – always same vertical position because of flex-1 above */}
+         <div
+           className={`pt-3 mt-4 border-t text-center text-xs
+           ${card.highlight ? "border-white/25 text-white/90" : "border-gray-200 text-gray-600"}`}
+         >
+           {card.footer}
+ 
+           {card.highlight && (
+             <button
+               className="mt-3 w-full py-2.5 rounded-full text-black font-semibold text-sm flex items-center justify-center gap-2"
+               style={{
+                 background:
+                   "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
+                 boxShadow:
+                   "0 16px 40px rgba(0,0,0,0.24), inset 0 6px 18px rgba(255,255,255,0.08)",
+               }}
+             >
+               <span>Get Your AI Clone At $37</span>
+               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                 <path
+                   d="M5 12h14M13 5l6 7-6 7"
+                   stroke="#111827"
+                   strokeWidth="2"
+                   strokeLinecap="round"
+                   strokeLinejoin="round"
+                 />
+               </svg>
+             </button>
+           )}
+         </div>
       </div>
     </motion.div>
   ))}
 </div>
+
 
           
         </div>
@@ -553,7 +560,7 @@ export default function AiClonePage() {
 
       {/* Pricing Section */}
       {/* Compare / Pricing CTA Section — pixel-fit to screenshots */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-3xl mx-auto">
           <motion.div
             className="text-center"
@@ -562,70 +569,66 @@ export default function AiClonePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            {/* Headline */}
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-black leading-tight">
-              Ready to Transform{" "}
-              <span className="text-[#C89356]">Your Real Estate Business?</span>
-            </h2>
+            {/* Headline - Three lines */}
+            <h1 className="text-5xl md:text-5xl font-normal mb-3 text-black leading-tight" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>
+              <div style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>Ready to Transform</div>
+              <div style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>
+                <span className="text-black" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>Your </span>
+                <span className="text-[#C89356]" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>Real Estate</span>
+              </div>
+              <div style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>
+                <span className="text-[#C89356]" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>Business</span>
+                <span className="text-black" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>?</span>
+              </div>
+            </h1>
 
             {/* Sub-headline */}
-            <p className="text-lg md:text-xl text-gray-800 mb-8">
+            <p className="text-base md:text-lg text-gray-800 mb-6">
               Join 500+ agents who are already using AI to dominate their market
             </p>
 
             {/* Green Bonus Banner */}
-            {/* Green Bonus Banner — Bigger Version */}
             <motion.div
-              className="relative bg-emerald-600 text-white rounded-[22px] px-8 py-7 mb-8 mx-auto max-w-2xl border-2 border-white/40 shadow-[0_25px_55px_rgba(0,0,0,0.08)]"
+              className="relative bg-emerald-600 text-white rounded-xl px-6 py-8 mb-6 mx-auto max-w-2xl border-2 border-white/40 shadow-md"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <div className="flex flex-col items-center justify-center">
-                <div className="flex items-center justify-center gap-4 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                    <Gift size={26} className="text-amber-300" />
-                  </div>
-
-                  {/* Bigger Title */}
-                  <div className="text-xl md:text-2xl font-extrabold uppercase tracking-wide">
-                    YOUR BONUS IS LOCKED IN!
-                  </div>
-                </div>
-
-                {/* Bigger subtitle */}
-                <div className="text-base md:text-lg opacity-95 font-medium">
-                  SSL Encrypted Payment &nbsp;•&nbsp; 30 Day Refund
+              <div className="flex flex-col items-center justify-center ">
+                <h3 className="text-base md:text-lg font-normal uppercase tracking-wide mb-2">
+                  🎁 YOUR BONUS IS LOCKED IN!
+                </h3>
+                <div className="text-xs md:text-sm opacity-95 font-normal">
+                  SSL Encrypted Payment * 30 Day Refund
                 </div>
               </div>
             </motion.div>
 
-            {/* White pricing card with warm gold border */}
+            {/* White pricing card */}
             <motion.div
-              className="relative bg-white rounded-[18px] p-8 border shadow-[0_30px_60px_rgba(16,24,32,0.06)] mb-8 mx-auto"
+              className="relative bg-white rounded-xl p-6 border shadow-md mb-6 mx-auto max-w-2xl"
               style={{ borderColor: "#EBCB9A", borderWidth: 2 }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
               viewport={{ once: true }}
             >
-              <div className="max-w-xl mx-auto text-center">
-                <div className="text-gray-900 text-base mb-4">
+              <div className="text-center" style={{ width: "100%" }}>
+                <div className="text-gray-900 text-sm mb-3 font-normal" style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}>
                   Total Value: <span className="line-through">$2,085</span>
                 </div>
 
-                <div className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-4 leading-none">
+                <div className="text-4xl md:text-5xl font-normal text-gray-900 mb-3 leading-none" style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}>
                   $37
                 </div>
 
-                <div className="text-emerald-600 font-semibold text-lg mb-4">
-                  98% OFF - BLACK FRIDAY ONLY
+                <div className="text-emerald-600 font-normal text-sm mb-3" style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}>
+                  98% OFF – BLACK FRIDAY ONLY
                 </div>
 
-                <div className="flex items-center justify-center gap-2 text-gray-700 text-sm">
-                  <Info size={18} className="text-gray-700" />
-                  <span>Price Will Jump to $97 tonight</span>
+                <div className="text-gray-700 text-xs font-normal" style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}>
+                  Price Will Jump to $97 tonight
                 </div>
               </div>
             </motion.div>
@@ -675,161 +678,163 @@ export default function AiClonePage() {
       </section>
 
       {/* ================ Compare Options — REPLACE THIS ENTIRE SECTION ================ */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black text-white">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-16"
+            className="text-center mb-10"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-tight">
+            <h2 className="text-2xl md:text-5xl text-white mb-3 tracking-tight">
               Select On <span className="text-[#C89356]">Top Service</span>
             </h2>
-            <p className="text-xl text-gray-300">See why 500+ agents choose the smart way.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-            {/* ------------------------------------------------------------- */}
-            {/* LEFT CARD — CARAMEL WITH GRID + 'Most Popular' BADGE         */}
-            {/* ------------------------------------------------------------- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+            {/* LEFT CARD — Multiple AI Content Avatar */}
             <motion.div
-              className="relative rounded-[28px] p-10 bg-[#C89356] border-4 border-white shadow-[0_25px_70px_rgba(0,0,0,0.65)] overflow-hidden"
+              className="relative rounded-2xl border-2 border-[#EBCB9A] bg-[#C89356] shadow-[0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)] overflow-visible"
+              style={{
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04), 0 0 20px rgba(235,203,154,0.3)",
+              }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              transition={{ duration: 0.4 }}
               viewport={{ once: true }}
             >
               {/* MOST POPULAR BADGE */}
-              <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-white text-black px-5 py-1 rounded-full text-sm font-semibold shadow-lg">
+              <div className="absolute -top-3 left-1/2 z-30 -translate-x-1/2 bg-white text-gray-900 px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg border-2 border-[#EBCB9A]">
                 Most Popular
               </div>
 
-              {/* GRID PATTERN OVERLAY TOP ONLY */}
+              {/* GRID PATTERN IN UPPER RIGHT */}
               <div
-                className="absolute top-0 left-0 w-full h-1/2 opacity-[0.22] pointer-events-none"
+                aria-hidden
+                className="absolute top-0 right-0 w-32 h-32 opacity-20 pointer-events-none"
                 style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.35) 1px, transparent 1px)",
-                  backgroundSize: "32px 32px",
+                  backgroundImage: `
+                    linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)
+                  `,
+                  backgroundSize: '20px 20px',
                 }}
               />
 
-              <div className="relative text-left mb-6 z-10">
-                <h3 className="text-[26px] font-bold text-black mb-2 leading-tight">
-                  Multiple AI Content Avatar
-                </h3>
-                <p className="text-black/85 mb-6 leading-relaxed">
-                  Ideal deal for: A consistent pipeline of avatar-led short-form content
-                </p>
-                <div className="text-4xl font-bold text-black mb-6">499 USD</div>
-                <hr className="border-black/30 mb-6" />
-              </div>
+              <div className="relative h-full w-full rounded-2xl overflow-hidden p-6 pt-8">
+                <div className="text-left mb-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-2 leading-tight">
+                    Multiple AI Content Avatar
+                  </h3>
+                  <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                    Ideal deal for: A consistent pipeline of avatar-led short-form content
+                  </p>
+                  
+                  {/* PRICING BOX */}
+                  <div className="bg-white/20 rounded-xl py-4 mb-4 w-full shadow-inner">
+                    <div className="text-2xl font-bold text-gray-900 text-center">499 USD</div>
+                  </div>
+                </div>
 
-              {/* INCLUDED LIST */}
-              <div className="relative z-10 mb-6">
-                <h4 className="font-semibold text-black mb-4 text-lg">What's Included</h4>
-                <ul className="space-y-4 text-black/90">
-                  {[
-                    "Reels Scripting & Creative Direction",
-                    "Capture of up to 5 AI Avatar Clones (With Voice, Facial Expression & Body Language Cloning)",
-                    "15 Reels included (professionally edited)",
-                    "Social media management included",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      {/* WHITE CIRCLE + GOLD CHECK */}
-                      <div className="w-7 h-7 rounded-full bg-white flex items-center justify-center shadow">
-                        <Check size={15} className="text-[#C89356]" />
-                      </div>
-                      <span className="text-base leading-snug">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+                <hr className="border-gray-300 mb-4" />
 
-              {/* WHITE BUTTON WITH INNER GLOW */}
-              <motion.button
-                onClick={routeToProcessFlow}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="relative w-full mt-4 rounded-full py-4 font-bold text-black"
-                style={{
-                  background: "#ffffff",
-                  boxShadow:
-                    "0 18px 40px rgba(0,0,0,0.35), inset 0 6px 12px rgba(255,255,255,0.95)",
-                }}
-              >
-                Purchase Now
-              </motion.button>
+                {/* INCLUDED LIST */}
+                <div className="mb-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">What's Included</h4>
+                  <ul className="space-y-2.5 text-sm text-gray-800">
+                    {[
+                      "Reels Scripting & Creative Direction",
+                      "Capture of up to 5 AI Avatar Clones (With Voice, Facial Expression & Body Language Cloning)",
+                      "15 Reels included (professionally edited)",
+                      "Social media management included",
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-[#F59E0B] flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check size={12} className="text-white" />
+                        </div>
+                        <span className="leading-snug">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* BUTTON */}
+                <motion.button
+                  onClick={routeToProcessFlow}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-gray-900 text-sm bg-white shadow-md"
+                  style={{
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.15), 0 0 15px rgba(255,255,255,0.3)",
+                  }}
+                >
+                  Purchase Now
+                </motion.button>
+              </div>
             </motion.div>
 
-            {/* ------------------------------------------------------------- */}
-            {/* RIGHT CARD — WHITE WITH GOLD HIGHLIGHT + ORANGE BUTTON        */}
-            {/* ------------------------------------------------------------- */}
+            {/* RIGHT CARD — Plug & Play System */}
             <motion.div
-              className="relative rounded-[28px] p-10 bg-white border-4 border-white shadow-[0_25px_70px_rgba(0,0,0,0.65)] overflow-hidden"
+              className="relative rounded-2xl border-2 border-[#EBCB9A] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)] overflow-hidden"
+              style={{
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04), 0 0 20px rgba(235,203,154,0.3)",
+              }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              {/* WARM GOLD HIGHLIGHT CORNER */}
-              <div
-                className="absolute top-0 right-0 w-60 h-60 opacity-40 pointer-events-none"
-                style={{
-                  background:
-                    "radial-gradient(circle at top right, rgba(240,180,80,0.45), rgba(255,255,255,0) 70%)",
-                  filter: "blur(22px)",
-                }}
-              />
+              <div className="relative h-full w-full rounded-2xl overflow-hidden p-6">
+                <div className="text-left mb-4">
+                  <h3 className="text-base font-semibold text-gray-900 mb-2 leading-tight">
+                    Plug & Play System
+                  </h3>
+                  <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                    Ideal for: Fully managed Avatars + Social Media content management across all channels end-to-end.
+                  </p>
+                  
+                  {/* PRICING BOX */}
+                  <div className="bg-gray-100 rounded-xl py-4 mb-4 w-full shadow-inner">
+                    <div className="text-2xl font-bold text-gray-900 text-center">999 USD</div>
+                  </div>
+                </div>
 
-              <div className="relative text-left mb-6 z-10">
-                <h3 className="text-[26px] font-bold text-gray-900 mb-2 leading-tight">
-                  Plug & Play System
-                </h3>
-                <p className="text-gray-700 mb-6 leading-relaxed">
-                  Ideal for: Fully managed Avatars + Social Media content management across all channels end-to-end.
-                </p>
-                <div className="text-4xl font-bold text-gray-900 mb-6">999 USD</div>
-                <hr className="border-gray-300 mb-6" />
+                <hr className="border-gray-200 mb-4" />
+
+                {/* INCLUDED LIST */}
+                <div className="mb-4">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">What's Included</h4>
+                  <ul className="space-y-2.5 text-sm text-gray-700">
+                    {[
+                      "Reels Scriptwriting & Monthly content calendar",
+                      "Capture of up to 24 custom AI Avatars/Clones (With Voice, Facial Expression & Body Language Cloning)",
+                      "30 Reels included (professionally edited)",
+                      "Social Media Management included",
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-[#F59E0B] flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <Check size={12} className="text-white" />
+                        </div>
+                        <span className="leading-snug">{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* BUTTON */}
+                <motion.button
+                  onClick={routeToProcessFlow}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-white text-sm bg-gradient-to-r from-[#C89356] to-[#F59E0B] shadow-md"
+                  style={{
+                    boxShadow: "0 2px 8px rgba(200,147,86,0.4), 0 0 15px rgba(245,158,11,0.3)",
+                  }}
+                >
+                  Purchase Now
+                </motion.button>
               </div>
-
-              {/* INCLUDED LIST */}
-              <div className="relative z-10 mb-6">
-                <h4 className="font-semibold text-gray-900 mb-4 text-lg">What's Included</h4>
-                <ul className="space-y-4 text-gray-800">
-                  {[
-                    "Reels Scriptwriting & Monthly content calendar",
-                    "Capture of up to 24 custom AI Avatars/Clones (With Voice, Facial Expression & Body Language Cloning)",
-                    "30 Reels included (professionally edited)",
-                    "Social Media Management included",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      {/* GOLD CIRCLE + WHITE CHECK */}
-                      <div className="w-7 h-7 rounded-full bg-[#F59E0B] flex items-center justify-center shadow">
-                        <Check size={15} className="text-white" />
-                      </div>
-                      <span className="text-base leading-snug">{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* ORANGE GRADIENT BUTTON — EXACT MATCH */}
-              <motion.button
-                onClick={routeToProcessFlow}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="relative w-full mt-4 rounded-full py-4 font-bold text-black"
-                style={{
-                  background: "linear-gradient(90deg,#EA580C,#F59E0B)",
-                  boxShadow:
-                    "0 22px 55px rgba(234,88,12,0.35), inset 0 6px 15px rgba(255,255,255,0.15)",
-                }}
-              >
-                Purchase Now
-              </motion.button>
             </motion.div>
           </div>
         </div>
@@ -940,7 +945,7 @@ export default function AiClonePage() {
       {/* ================= end replacement ================= */}
 
       {/* FAQ Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-4xl mx-auto">
           <motion.h2
             className="text-4xl md:text-5xl font-bold mb-4 text-center"

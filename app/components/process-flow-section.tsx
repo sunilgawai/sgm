@@ -9,8 +9,7 @@ const RECORDING_SCRIPT = `Hello! I'm feeling confident and relaxed right now. Th
 My face is clearly visible. I'm speaking in a steady pace with a natural tone. I'm taking pauses between sentences. This recording is fun and I'm in a great mood. I'll continue doing my best until the end.`
 
 const PACKAGES = [
-  { id: "multiple-ai", name: "Multiple AI Content Avatar", amount: 499 },
-  { id: "plug-play", name: "Plug & Play System", amount: 999 },
+  { id: "ai-clone", name: "Get Your AI Clone", amount: 37 },
 ]
 
 export default function ProcessFlowSection() {
@@ -305,7 +304,7 @@ export default function ProcessFlowSection() {
           viewport={{ once: true }}
         >
           <span className="text-white">The </span>
-          <span className="text-[#F59E0B]">Process</span>
+          <span className="text-[#C89356]">Process</span>
         </motion.h2>
 
         {/* Stepper */}
@@ -326,11 +325,12 @@ export default function ProcessFlowSection() {
                   {/* Pointing Hand Emoji with Animation - Mobile (Left side) */}
                   {isCurrent && (
                     <motion.div
-                      className="text-3xl"
+                      className="flex items-center gap-2"
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3 }}
                     >
+                      <span className="text-xs text-white/80 font-medium">Click here</span>
                       <motion.div
                         animate={{
                           x: [0, 8, 0],
@@ -341,6 +341,7 @@ export default function ProcessFlowSection() {
                           ease: "easeInOut",
                         }}
                         style={{ filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.3))" }}
+                        className="text-3xl"
                       >
                         👉
                       </motion.div>
@@ -348,14 +349,14 @@ export default function ProcessFlowSection() {
                   )}
                   {!isCurrent && <div className="w-10" />}
                   
-                  <div className="flex flex-col items-center flex-1">
+              <div className="flex flex-col items-center flex-1">
                     <motion.div
                       className={`w-20 h-20 rounded-full flex items-center justify-center font-bold text-3xl border-4 cursor-pointer transition-all ${
                         isCompleted
-                          ? "bg-green-500 text-white border-green-500"
+                      ? "bg-green-500 text-white border-green-500"
                           : isCurrent
-                            ? "bg-white text-[#B45309] border-[#F59E0B]"
-                            : "bg-gray-700 text-gray-400 border-gray-600"
+                        ? "bg-white text-[#C89356] border-[#C89356]"
+                        : "bg-gray-700 text-gray-400 border-gray-600"
                       } ${isClickable ? "hover:scale-110 cursor-pointer" : "cursor-not-allowed opacity-60"}`}
                       onClick={() => {
                         if (!isClickable) {
@@ -407,10 +408,15 @@ export default function ProcessFlowSection() {
                     >
                       {isCompleted ? <Check size={32} /> : step}
                     </motion.div>
-                    <div className="mt-2 text-sm font-medium text-white text-center italic">
-                      {step === 1 && "Purchase"}
-                      {step === 2 && "Upload"}
-                      {step === 3 && "Contact"}
+                    <div className="mt-2 text-base font-medium text-white text-center italic">
+                      {step === 1 && "STEP 1"}
+                      {step === 2 && "STEP 2"}
+                      {step === 3 && "STEP 3"}
+                    </div>
+                    <div className="mt-1 text-sm font-medium text-white text-center">
+                      {step === 1 && "Purchase Your AI Clone"}
+                      {step === 2 && "Upload your raw video by following the script/template"}
+                      {step === 3 && "complete the contact information and script"}
                     </div>
                   </div>
                 </div>
@@ -423,7 +429,7 @@ export default function ProcessFlowSection() {
                         isCompleted
                           ? "bg-green-500 text-white border-green-500"
                           : isCurrent
-                            ? "bg-white text-[#B45309] border-[#F59E0B]"
+                            ? "bg-white text-[#C89356] border-[#C89356]"
                             : "bg-gray-700 text-gray-400 border-gray-600"
                       } ${isClickable ? "hover:scale-110 cursor-pointer" : "cursor-not-allowed opacity-60"}`}
                       onClick={() => {
@@ -479,11 +485,12 @@ export default function ProcessFlowSection() {
                     {/* Pointing Hand Emoji with Animation - Desktop (Above) */}
                     {isCurrent && (
                       <motion.div
-                        className="absolute -top-8 left-1/2 -translate-x-1/2 text-3xl"
+                        className="absolute -top-12 left-1/2 -translate-x-1/2 flex flex-col items-center text-3xl"
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.3 }}
                       >
+                        <span className="text-xs text-white/80 font-medium mb-1">Click here</span>
                         <motion.div
                           animate={{
                             y: [0, 8, 0],
@@ -499,16 +506,21 @@ export default function ProcessFlowSection() {
                         </motion.div>
                       </motion.div>
                     )}
-                    <div className="mt-2 text-sm font-medium text-white text-center italic">
-                      {step === 1 && "Purchase"}
-                      {step === 2 && "Upload"}
-                      {step === 3 && "Contact"}
+                    <div className="mt-2 text-base font-medium text-white text-center italic">
+                      {step === 1 && "STEP 1"}
+                      {step === 2 && "STEP 2"}
+                      {step === 3 && "STEP 3"}
+                    </div>
+                    <div className="mt-1 text-sm font-medium text-white text-center">
+                      {step === 1 && "Purchase Your AI Clone"}
+                      {step === 2 && "Upload your raw video by following the script/template"}
+                      {step === 3 && "complete the contact information and script"}
                     </div>
                   </div>
                 </div>
 
                 {/* Connecting Lines */}
-                {step < 3 && (
+              {step < 3 && (
                   <>
                     {/* Mobile: Vertical line */}
                     <div
@@ -519,12 +531,12 @@ export default function ProcessFlowSection() {
                     {/* Desktop: Horizontal line */}
                     <div
                       className={`hidden md:block h-0.5 w-16 md:w-24 mx-4 transition-colors ${
-                        completedSteps.includes(step + 1) || currentStep > step ? "bg-green-500" : "bg-white/30"
-                      }`}
+                    completedSteps.includes(step + 1) || currentStep > step ? "bg-green-500" : "bg-white/30"
+                  }`}
                     />
                   </>
-                )}
-              </div>
+              )}
+            </div>
             )
           })}
         </div>
@@ -542,10 +554,10 @@ export default function ProcessFlowSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-[#1a1a1a] rounded-xl p-8 border border-[#B45309]"
+              className="bg-[#1a1a1a] rounded-xl p-8 border border-[#C89356]"
             >
               <div className="text-center mb-8">
-                <CreditCard className="mx-auto mb-4 text-[#F59E0B]" size={48} />
+                <CreditCard className="mx-auto mb-4 text-[#C89356]" size={48} />
                 <h3 className="text-2xl font-bold text-white mb-4">STEP 1 — Purchase Your AI Clone</h3>
               </div>
 
@@ -553,16 +565,16 @@ export default function ProcessFlowSection() {
                 {PACKAGES.map((pkg) => (
                   <div
                     key={pkg.id}
-                    className="border-2 border-[#B45309] rounded-lg p-6 hover:border-[#F59E0B] transition-colors"
+                    className="border-2 border-[#C89356] rounded-lg p-6 hover:border-[#C89356] transition-colors"
                   >
                     <div className="flex justify-between items-center mb-4">
                       <h4 className="text-xl font-bold text-white">{pkg.name}</h4>
-                      <span className="text-2xl font-bold text-[#F59E0B]">${pkg.amount}</span>
+                      <span className="text-2xl font-bold text-[#C89356]">${pkg.amount}</span>
                     </div>
                     <button
                       onClick={() => handleCheckout(pkg.id, pkg.amount)}
                       disabled={loading}
-                      className="w-full py-3 bg-[#B45309] text-white rounded-lg font-semibold hover:bg-[#92400E] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full py-3 bg-[#C89356] text-white rounded-lg font-semibold hover:bg-[#B45309] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? (
                         <span className="flex items-center justify-center gap-2">
@@ -592,23 +604,23 @@ export default function ProcessFlowSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-[#1a1a1a] rounded-xl p-8 border border-[#B45309]"
+              className="bg-[#1a1a1a] rounded-xl p-8 border border-[#C89356]"
             >
               <div className="text-center mb-8">
-                <Upload className="mx-auto mb-4 text-[#F59E0B]" size={48} />
+                <Upload className="mx-auto mb-4 text-[#C89356]" size={48} />
                 <h3 className="text-2xl font-bold text-white mb-4">STEP 2 — Upload Video</h3>
                 <p className="text-gray-400">Payment confirmed — please record yourself following the script below and upload your video</p>
               </div>
 
               <div className="space-y-6">
                 {/* Script Display */}
-                <div className="bg-[#2a2a2a] border border-[#B45309] rounded-lg p-6">
+                <div className="bg-[#2a2a2a] border border-[#C89356] rounded-lg p-6">
                   <label className="block text-sm font-semibold text-white mb-3">
                     Please record yourself following this script:
                   </label>
                   <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#92400E]">
                     <p className="text-white whitespace-pre-line leading-relaxed text-base">{RECORDING_SCRIPT}</p>
-                  </div>
+                </div>
                   <p className="mt-3 text-sm text-gray-400">
                     Record in a quiet room. Keep camera at eye level. Speak clearly and naturally.
                   </p>
@@ -619,7 +631,7 @@ export default function ProcessFlowSection() {
                   <label className="block text-sm font-semibold text-white mb-2">
                     Upload Your Recording <span className="text-red-500">*</span>
                   </label>
-                  <div className="border-2 border-dashed border-[#B45309] rounded-lg p-8 text-center hover:border-[#F59E0B] transition-colors">
+                  <div className="border-2 border-dashed border-[#C89356] rounded-lg p-8 text-center hover:border-[#C89356] transition-colors">
                     <input
                       type="file"
                       accept=".mp4,.mov"
@@ -719,7 +731,7 @@ export default function ProcessFlowSection() {
                     }
                   }}
                   disabled={loading || (files.length === 0 && uploadedFiles.length === 0)}
-                  className="w-full py-3 bg-[#B45309] text-white rounded-lg font-semibold hover:bg-[#92400E] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#C89356] text-white rounded-lg font-semibold hover:bg-[#B45309] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -741,10 +753,10 @@ export default function ProcessFlowSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              className="bg-[#1a1a1a] rounded-xl p-8 border border-[#B45309]"
+              className="bg-[#1a1a1a] rounded-xl p-8 border border-[#C89356]"
             >
               <div className="text-center mb-8">
-                <User className="mx-auto mb-4 text-[#F59E0B]" size={48} />
+                <User className="mx-auto mb-4 text-[#C89356]" size={48} />
                 <h3 className="text-2xl font-bold text-white mb-4">STEP 3 — Contact Information</h3>
                 <p className="text-gray-400">Please provide your contact information and script description to complete the process</p>
               </div>
@@ -758,7 +770,7 @@ export default function ProcessFlowSection() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#B45309] text-white rounded-lg focus:outline-none focus:border-[#F59E0B]"
+                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#C89356] text-white rounded-lg focus:outline-none focus:border-[#C89356]"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -771,7 +783,7 @@ export default function ProcessFlowSection() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#B45309] text-white rounded-lg focus:outline-none focus:border-[#F59E0B]"
+                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#C89356] text-white rounded-lg focus:outline-none focus:border-[#C89356]"
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -784,7 +796,7 @@ export default function ProcessFlowSection() {
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#B45309] text-white rounded-lg focus:outline-none focus:border-[#F59E0B]"
+                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#C89356] text-white rounded-lg focus:outline-none focus:border-[#C89356]"
                     placeholder="+1234567890"
                   />
                 </div>
@@ -797,7 +809,7 @@ export default function ProcessFlowSection() {
                     value={customPrompt}
                     onChange={(e) => setCustomPrompt(e.target.value)}
                     rows={6}
-                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#B45309] text-white rounded-lg focus:outline-none focus:border-[#F59E0B] resize-none"
+                    className="w-full px-4 py-3 bg-[#2a2a2a] border border-[#C89356] text-white rounded-lg focus:outline-none focus:border-[#C89356] resize-none"
                     placeholder="Write the script or prompt description you want your AI avatar to say. For example: 'Hello! Welcome to our real estate services. I'm here to help you find your dream home...'"
                   />
                   <p className="mt-2 text-sm text-gray-400">
@@ -875,7 +887,7 @@ export default function ProcessFlowSection() {
                     }
                   }}
                   disabled={loading || !name.trim() || !email.trim() || !phone.trim() || !customPrompt.trim()}
-                  className="w-full py-3 bg-[#B45309] text-white rounded-lg font-semibold hover:bg-[#92400E] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#C89356] text-white rounded-lg font-semibold hover:bg-[#B45309] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
