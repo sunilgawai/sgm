@@ -9,7 +9,7 @@ import Footer from "./footer"
 const CONFIG = {
   aiClone: {
     hero: {
-      cta: "Get Your AI Clone — $37",
+      cta: "Get Your AI Clone At $37",
     },
   },
   home: {
@@ -60,83 +60,114 @@ export default function HomePage() {
   const prefersReducedMotion =
     typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false
 
+  const HEADER_COLOR = "#C89356"; 
+  // Custom color matching the dark brown text shadow/color visible in the screenshot
+  const HERO_TEXT_COLOR = "text-[#794D23]"; 
+
   return (
-    <main className="bg-[#F5E6D3]">
-      {/* Hero Section */}
-      <section className="min-h-screen pt-24 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-[#F5E6D3]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-          {/* Left: Headline & CTA */}
-          <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: prefersReducedMotion ? 0 : 0.2 }}
+    <main className="bg-black">
+      
+      {/* 🚀 Hero Section - Final Screenshot Match */}
+      <section 
+        className={`min-h-screen pt-24 pb-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-start bg-[${HEADER_COLOR}] rounded-b-[80px] sm:rounded-b-[120px] shadow-2xl`}
+      >
+        <div className="max-w-4xl mx-auto text-center mt-20">
+          
+          {/* Main Copy (No camera, No editing, No tech skills.) */}
+          <motion.p
+            // ✨ FINAL SIZE: text-lg (matches first line size)
+            // ✨ FINAL COLOR: Dark brown #794D23
+            className={`text-3xl md:text-4xl font-semibold text-white  mb-2`}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: prefersReducedMotion ? 0 : 0.2 }}
           >
-            <motion.h1
-              className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ staggerChildren: 0.05, delayChildren: prefersReducedMotion ? 0 : 0.3 }}
-            >
-              Create Professional Video Content In Minutes
-            </motion.h1>
-            <p className="text-xl text-gray-700 mb-8 leading-relaxed">
-              Transform your vision into stunning video content with our AI-powered platform. No equipment. No
-              experience. Just results.
-            </p>
-            <div className="flex gap-4">
-              <Link href="/ai-clone">
-                <motion.button
-                  className="px-8 py-3 bg-[#B45309] text-white rounded-lg font-semibold hover:bg-[#92400E] transition-colors shadow-lg"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Get Started Now
-                </motion.button>
-              </Link>
+            No camera. No editing. No tech skills.
+          </motion.p>
+
+          {/* Headline (Create Your AI Clone In Just 30 mins) */}
+          <motion.h1
+           
+            className={`text-4xl md:text-5xl text-white mb-8 leading-tight`}
+            // style={{ textShadow: '0 2px 4px rgba(0,0,0,0.4)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: prefersReducedMotion ? 0 : 0.4 }}
+          >
+            Create Your AI Clone 
+            <br />
+            <span  className={`text-4xl md:text-5xl font-extrabold text-black mb-8 leading-2`}>
+            In Just 30 mins
+            </span>
+          </motion.h1>
+
+          {/* Video Placeholder Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: prefersReducedMotion ? 0 : 0.6 }}
+            className="relative w-full max-w-xl aspect-video mx-auto overflow-hidden rounded-[2.5rem]  mt-10"
+          >
+            <div className="absolute inset-0 bg-gray-700/80 flex items-center justify-center">
+              <img
+                src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop"
+                alt="AI clone video meeting"
+                className="w-full h-full object-cover opacity-70"
+                loading="lazy"
+              />
+               <div className="absolute inset-0 bg-black/30"></div> 
+
+              {/* Play Button */}
               <motion.button
-                className="px-8 py-3 border-2 border-[#B45309] text-[#B45309] rounded-lg font-semibold hover:bg-[#B45309]/10 transition-colors"
-                whileHover={{ scale: 1.05 }}
+                className="absolute p-4 bg-white rounded-full shadow-xl hover:bg-gray-100 transition-colors"
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
+                aria-label="Play video"
               >
-                Watch Demo
+                {/* Play button icon color matches the dark hero text color */}
+                <Play size={30} className={`text-[#794D23] fill-[#794D23] ml-1`} />
               </motion.button>
             </div>
           </motion.div>
 
-          {/* Right: Media Card */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: prefersReducedMotion ? 0 : 0.4 }}
-            className="relative"
+          {/* Bottom Callout Text (Real Estate Agents...) */}
+          <motion.p
+            // ✨ FINAL SIZE: text-lg/xl (condensed and bold)
+            // ✨ FINAL COLOR: Dark brown #794D23
+            className={`text-3xl md:text-3xl font-bold text-white mt-10 mb-20`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: prefersReducedMotion ? 0 : 0.8 }}
           >
-            <motion.div
-              className="relative rounded-2xl overflow-hidden border-2 border-[#B45309]/30 bg-white p-1 shadow-2xl"
-              animate={prefersReducedMotion ? {} : { y: [0, -10, 0] }}
-              transition={{ duration: 4, repeat: Number.POSITIVE_INFINITY }}
+            Real Estate Agents Are Using AI To Get
+            <br />
+            <span   className={`text-2xl pt-9 relative bottom-0.5 md:text-2xl font-bold text-black mt-12 mb-6`}>
+
+            3x More Luxury Listings
+            </span>
+          </motion.p>
+
+          {/* Final CTA Button */}
+          <Link href="/ai-clone#process-flow">
+            <motion.button
+              className={`px-6 py-3 bg-white text-[#111] rounded-full font-bold shadow-lg transition-all duration-300 hover:text-[${HEADER_COLOR}] hover:scale-105`}
+              whileHover={{ scale: 1.05, boxShadow: "0 0 40px rgba(255,255,255,0.7), 0 0 20px rgba(255,255,255,0.4), 0 8px 30px rgba(0,0,0,0.1)" }}
+              whileTap={{ scale: 0.98 }}
+              style={{
+                boxShadow:
+                  "0 18px 60px rgba(0,0,0,0.35), 0 0 36px rgba(255,255,255,0.08), 0 8px 30px rgba(180,83,9,0.08)",
+              }}
             >
-              <img
-                src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&h=600&fit=crop"
-                alt="Professional video content creation"
-                className="w-full rounded-xl"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <motion.button
-                  className="p-4 bg-[#EA580C] rounded-full shadow-lg hover:bg-[#D97706] transition-colors"
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Play size={32} className="text-white fill-white ml-1" />
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
+              {CONFIG.aiClone.hero.cta}
+            </motion.button>
+          </Link>
         </div>
       </section>
 
+      {/* --- Rest of the existing content follows below --- */}
+      
       {/* Services Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-black">
         <div className="max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0 }}
@@ -167,6 +198,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* --- */}
 
       {/* Case Studies */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#F5E6D3]">
@@ -215,6 +248,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* --- */}
+
       {/* CTA to AI Clone */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#B45309]">
         <div className="max-w-4xl mx-auto text-center">
@@ -232,7 +267,7 @@ export default function HomePage() {
           </p>
           <Link href="/ai-clone#process-flow">
             <motion.button
-              className="px-8 py-4 bg-white text-[#B45309] rounded-lg font-semibold hover:bg-gray-100 transition-colors text-lg shadow-lg"
+              className="px-8 py-4 bg-white text-[#B45309] rounded-lg font-semibold hover:bg-gray-100 transition-colors text-lg shadow-[0_30px_60px_rgba(225,225,225,2225.4)] "
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -246,4 +281,3 @@ export default function HomePage() {
     </main>
   )
 }
-
