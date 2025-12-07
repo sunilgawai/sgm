@@ -171,6 +171,8 @@ const routeToProcessFlow = () => {
 export default function AiClonePage() {
   const [isPurchaseOpen, setIsPurchaseOpen] = useState(false)
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false)
+  const [isCheckoutLoading499, setIsCheckoutLoading499] = useState(false)
+  const [isCheckoutLoading999, setIsCheckoutLoading999] = useState(false)
   const prefersReducedMotion =
     typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false
 
@@ -218,7 +220,7 @@ export default function AiClonePage() {
   }
 
   const handleCheckout499 = async () => {
-    setIsCheckoutLoading(true)
+    setIsCheckoutLoading499(true)
     try {
       const response = await fetch("/api/v1/checkout/create-session", {
         method: "POST",
@@ -247,12 +249,12 @@ export default function AiClonePage() {
       console.error("Checkout error:", err)
       alert(err.message || "Failed to start checkout. Please try again.")
     } finally {
-      setIsCheckoutLoading(false)
+      setIsCheckoutLoading499(false)
     }
   }
 
   const handleCheckout999 = async () => {
-    setIsCheckoutLoading(true)
+    setIsCheckoutLoading999(true)
     try {
       const response = await fetch("/api/v1/checkout/create-session", {
         method: "POST",
@@ -281,7 +283,7 @@ export default function AiClonePage() {
       console.error("Checkout error:", err)
       alert(err.message || "Failed to start checkout. Please try again.")
     } finally {
-      setIsCheckoutLoading(false)
+      setIsCheckoutLoading999(false)
     }
   }
 
@@ -879,7 +881,7 @@ export default function AiClonePage() {
                 {/* BUTTON */}
                 <motion.button
                   onClick={handleCheckout499}
-                  disabled={isCheckoutLoading}
+                  disabled={isCheckoutLoading499 || isCheckoutLoading999}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-gray-900 text-sm bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
@@ -887,7 +889,7 @@ export default function AiClonePage() {
                     boxShadow: "0 2px 8px rgba(0,0,0,0.15), 0 0 15px rgba(255,255,255,0.3)",
                   }}
                 >
-                  {isCheckoutLoading ? "Processing..." : "Purchase Now"}
+                  {isCheckoutLoading499 ? "Processing..." : "Purchase Now"}
                 </motion.button>
               </div>
             </motion.div>
@@ -943,7 +945,7 @@ export default function AiClonePage() {
                 {/* BUTTON */}
                 <motion.button
                   onClick={handleCheckout999}
-                  disabled={isCheckoutLoading}
+                  disabled={isCheckoutLoading499 || isCheckoutLoading999}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-white text-sm bg-gradient-to-r from-[#C89356] to-[#F59E0B] shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
@@ -951,7 +953,7 @@ export default function AiClonePage() {
                     boxShadow: "0 2px 8px rgba(200,147,86,0.4), 0 0 15px rgba(245,158,11,0.3)",
                   }}
                 >
-                  {isCheckoutLoading ? "Processing..." : "Purchase Now"}
+                  {isCheckoutLoading999 ? "Processing..." : "Purchase Now"}
                 </motion.button>
               </div>
             </motion.div>

@@ -37,7 +37,8 @@ npm install
 2. Get your API keys from the Stripe Dashboard
 3. Set up a webhook endpoint:
    - Go to Stripe Dashboard → Developers → Webhooks
-   - Add endpoint: `https://yourdomain.com/api/v1/webhooks/stripe`
+   - Add endpoint: `${APP_BASE_URL}/api/v1/webhooks/stripe` (e.g., `https://signatureglobalmedia.com/api/v1/webhooks/stripe`)
+   - **Important:** Use the same `APP_BASE_URL` value from your `.env.local` file
    - Select events: `checkout.session.completed` and `payment_intent.succeeded`
    - Copy the webhook signing secret to `STRIPE_WEBHOOK_SECRET`
 

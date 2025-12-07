@@ -468,33 +468,96 @@ export default function ProcessFlowSection() {
               </React.Fragment>
             )
           })}
-        </div>
+                </div>
 
         {/* Mobile: Sequential Vertical Flow */}
         <div className="md:hidden space-y-8 mb-12">
+          {/* Error Message for Mobile */}
+          {error && (
+            <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm mb-4">{error}</div>
+          )}
           {[1, 2, 3].map((step) => {
             const isCurrent = currentStep === step
             const isCompleted = completedSteps.includes(step)
             const shouldShow = step === 1 || completedSteps.includes(step - 1) || (step === 2 && paymentStatus === "paid") || (step === 3 && completedSteps.includes(2))
             
+            // Step is clickable only if all previous steps are completed
+            const isClickable = 
+              step === 1 || 
+              (step === 2 && completedSteps.includes(1) && paymentStatus === "paid") ||
+              (step === 3 && completedSteps.includes(1) && completedSteps.includes(2) && paymentStatus === "paid" && (uploadedFiles.length > 0 || submissionId))
+            
             return (
               <div key={step} className="space-y-4">
                 {/* Step Circle */}
                 <div className="flex flex-col items-center">
-                  <motion.div
-                    className={`w-20 h-20 rounded-full flex items-center justify-center font-bold text-3xl border-4 bg-transparent text-[#C89356] ${
+                    <motion.div
+                    className={`w-20 h-20 rounded-full flex items-center justify-center font-bold text-3xl border-4 bg-transparent text-[#C89356] cursor-pointer transition-all ${
                       isCurrent ? "border-white" : "border-gray-500"
-                    }`}
-                  >
+                    } ${isClickable ? "hover:scale-110" : "cursor-not-allowed opacity-60"}`}
+                      onClick={() => {
+                      // Prevent navigation if step 3 is completed
+                      if (completedSteps.includes(3)) {
+                        setError("Process completed! Please refresh to start a new order.")
+                        return
+                      }
+                      
+                        if (!isClickable) {
+                          // Show error message based on which step is missing
+                          if (step === 2) {
+                            setError("Please complete Step 1 (Purchase) first before proceeding to Step 2.")
+                          } else if (step === 3) {
+                            if (!completedSteps.includes(1) || paymentStatus !== "paid") {
+                              setError("Please complete Step 1 and Step 2 first before proceeding to Step 3.")
+                            } else if (!completedSteps.includes(2) || (uploadedFiles.length === 0 && !submissionId)) {
+                              setError("Please complete Step 2 (Upload) first before proceeding to Step 3.")
+                            }
+                          }
+                          setTimeout(() => {
+                            sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                          }, 100)
+                          return
+                        }
+                        
+                        // Only allow navigation if previous steps are completed
+                        if (step === 1) {
+                          setCurrentStep(1)
+                          setError(null)
+                        } else if (step === 2) {
+                          // Only allow if step 1 is completed
+                          if (completedSteps.includes(1) && paymentStatus === "paid") {
+                            setCurrentStep(2)
+                            setError(null)
+                          } else {
+                            setError("Please complete Step 1 (Purchase) first before proceeding to Step 2.")
+                          }
+                        } else if (step === 3) {
+                          // Only allow if steps 1 and 2 are completed
+                          if (!completedSteps.includes(1) || paymentStatus !== "paid") {
+                          setError("Please complete Step 1 and Step 2 first before proceeding to Step 3.")
+                          } else if (!completedSteps.includes(2) || (uploadedFiles.length === 0 && !submissionId)) {
+                            setError("Please complete Step 2 (Upload) first before proceeding to Step 3.")
+                          } else {
+                            setCurrentStep(3)
+                            setError(null)
+                          }
+                        }
+                        setTimeout(() => {
+                          sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+                        }, 100)
+                      }}
+                      whileHover={isClickable ? { scale: 1.1 } : {}}
+                      whileTap={isClickable ? { scale: 0.95 } : {}}
+                    >
                     {step}
-                  </motion.div>
+                    </motion.div>
                   <div className="mt-2 text-base font-medium text-white text-center">
-                    {step === 1 && "STEP 1"}
-                    {step === 2 && "STEP 2"}
-                    {step === 3 && "STEP 3"}
-                  </div>
-                  <div className="mt-1 text-sm font-medium text-white text-center">
-                    {step === 1 && "Purchase Your AI Clone"}
+                      {step === 1 && "STEP 1"}
+                      {step === 2 && "STEP 2"}
+                      {step === 3 && "STEP 3"}
+                    </div>
+                    <div className="mt-1 text-sm font-medium text-white text-center">
+                      {step === 1 && "Purchase Your AI Clone"}
                     {step === 2 && (
                       <>
                         Upload your raw video by following<br />the script/template
@@ -505,7 +568,7 @@ export default function ProcessFlowSection() {
                 </div>
 
                 {/* Connecting Line */}
-                {step < 3 && (
+              {step < 3 && (
                   <div className={`w-0.5 h-8 mx-auto transition-colors ${
                         completedSteps.includes(step + 1) || currentStep > step ? "bg-green-500" : "bg-white/30"
                   }`} />
@@ -797,9 +860,9 @@ export default function ProcessFlowSection() {
           })}
         </div>
 
-        {/* Error Message */}
+        {/* Error Message - Visible on both mobile and desktop */}
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">{error}</div>
+          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm md:text-base">{error}</div>
         )}
 
         {/* Desktop: Step Components (AnimatePresence) - Hidden on mobile */}
