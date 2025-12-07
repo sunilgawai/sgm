@@ -586,7 +586,7 @@ export default function AiClonePage() {
                  {card.title}
                </p>
                <p
-                 className={`text-xs italic
+                 className={`text-l
                  ${card.highlight ? "text-white/80" : "text-gray-600"}`}
                >
                  {idx === 0 ? "Hire Videographer" : idx === 1 ? "Learn Video Editing" : "AgentClone AI"}
@@ -616,13 +616,13 @@ export default function AiClonePage() {
            {card.list.map((txt, i) => (
              <li key={i} className="flex items-start gap-2.5">
                <div
-                 className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5
+                 className={`w-7 h-7 md:w-5 md:h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5
                  ${card.highlight ? "bg-white/20" : "bg-[#F2F3F5]"}`}
                >
                  {card.highlight ? (
-                   <Check className="w-3 h-3 text-white" />
+                   <Check className="w-4 h-4 md:w-3 md:h-3 text-white" />
                  ) : (
-                   <XIcon className="w-3 h-3 text-gray-500" />
+                   <XIcon className="w-4 h-4 md:w-3 md:h-3 text-gray-500" />
                  )}
                </div>
                <span>{txt}</span>
