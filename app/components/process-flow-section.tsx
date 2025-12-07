@@ -365,7 +365,7 @@ export default function ProcessFlowSection() {
                             setError("Please complete Step 1 (Purchase) first before proceeding to Step 2.")
                           } else if (step === 3) {
                             if (!completedSteps.includes(1) || paymentStatus !== "paid") {
-                              setError("Please complete Step 1 (Purchase) first before proceeding to Step 3.")
+                              setError("Please complete Step 1 and Step 2 first before proceeding to Step 3.")
                             } else if (!completedSteps.includes(2) || (uploadedFiles.length === 0 && !submissionId)) {
                               setError("Please complete Step 2 (Upload) first before proceeding to Step 3.")
                             }
@@ -391,7 +391,7 @@ export default function ProcessFlowSection() {
                         } else if (step === 3) {
                           // Only allow if steps 1 and 2 are completed
                           if (!completedSteps.includes(1) || paymentStatus !== "paid") {
-                            setError("Please complete Step 1 (Purchase) first before proceeding to Step 3.")
+                            setError("Please complete Step 1 and Step 2 first before proceeding to Step 3.")
                           } else if (!completedSteps.includes(2) || (uploadedFiles.length === 0 && !submissionId)) {
                             setError("Please complete Step 2 (Upload) first before proceeding to Step 3.")
                           } else {
@@ -439,7 +439,7 @@ export default function ProcessFlowSection() {
                             setError("Please complete Step 1 (Purchase) first before proceeding to Step 2.")
                           } else if (step === 3) {
                             if (!completedSteps.includes(1) || paymentStatus !== "paid") {
-                              setError("Please complete Step 1 (Purchase) first before proceeding to Step 3.")
+                              setError("Please complete Step 1 and Step 2 first before proceeding to Step 3.")
                             } else if (!completedSteps.includes(2) || (uploadedFiles.length === 0 && !submissionId)) {
                               setError("Please complete Step 2 (Upload) first before proceeding to Step 3.")
                             }

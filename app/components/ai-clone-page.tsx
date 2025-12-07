@@ -170,8 +170,120 @@ const routeToProcessFlow = () => {
 
 export default function AiClonePage() {
   const [isPurchaseOpen, setIsPurchaseOpen] = useState(false)
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false)
   const prefersReducedMotion =
     typeof window !== "undefined" ? window.matchMedia("(prefers-reduced-motion: reduce)").matches : false
+
+  const handleCheckout = async () => {
+    setIsCheckoutLoading(true)
+    try {
+      // First scroll to process flow section
+      setTimeout(() => {
+        const section = document.getElementById("process-flow")
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth", block: "start" })
+        }
+      }, 100)
+
+      // Create Stripe checkout session
+      const response = await fetch("/api/v1/checkout/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packageId: "ai-clone",
+          amount: 37,
+          currency: "usd",
+          buyer: {
+            email: "customer@example.com", // Will be collected in Stripe
+            phone: "+1234567890", // Will be updated from Stripe if provided
+          },
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url
+      } else {
+        console.error("Checkout error:", data.error || "Failed to create checkout session")
+        alert(data.error || "Failed to start checkout. Please try again.")
+      }
+    } catch (err: any) {
+      console.error("Checkout error:", err)
+      alert(err.message || "Failed to start checkout. Please try again.")
+    } finally {
+      setIsCheckoutLoading(false)
+    }
+  }
+
+  const handleCheckout499 = async () => {
+    setIsCheckoutLoading(true)
+    try {
+      const response = await fetch("/api/v1/checkout/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packageId: "multiple-ai-content-avatar",
+          amount: 499,
+          currency: "usd",
+          buyer: {
+            email: "customer@example.com", // Will be collected in Stripe
+            phone: "+1234567890", // Will be updated from Stripe if provided
+          },
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url
+      } else {
+        console.error("Checkout error:", data.error || "Failed to create checkout session")
+        alert(data.error || "Failed to start checkout. Please try again.")
+      }
+    } catch (err: any) {
+      console.error("Checkout error:", err)
+      alert(err.message || "Failed to start checkout. Please try again.")
+    } finally {
+      setIsCheckoutLoading(false)
+    }
+  }
+
+  const handleCheckout999 = async () => {
+    setIsCheckoutLoading(true)
+    try {
+      const response = await fetch("/api/v1/checkout/create-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          packageId: "plug-play-system",
+          amount: 999,
+          currency: "usd",
+          buyer: {
+            email: "customer@example.com", // Will be collected in Stripe
+            phone: "+1234567890", // Will be updated from Stripe if provided
+          },
+        }),
+      })
+
+      const data = await response.json()
+
+      if (data.url) {
+        // Redirect to Stripe checkout
+        window.location.href = data.url
+      } else {
+        console.error("Checkout error:", data.error || "Failed to create checkout session")
+        alert(data.error || "Failed to start checkout. Please try again.")
+      }
+    } catch (err: any) {
+      console.error("Checkout error:", err)
+      alert(err.message || "Failed to start checkout. Please try again.")
+    } finally {
+      setIsCheckoutLoading(false)
+    }
+  }
 
   const faqs = [
     {
@@ -207,9 +319,9 @@ export default function AiClonePage() {
 
         {/* HEADINGS */}
         <div className="text-center max-w-4xl mx-auto px-6">
-          <p className="text-white/95 text-large mb-3 font-bold">No camera. No editing. No tech skills.</p>
+          <p className="text-white/95 text-xl lg:text-3xl mb-3 font-bold">No camera. No editing. No tech skills.</p>
 
-          <h1 className="text-white text-4xl md:text-6xl lg:text-7xl font-normal drop-shadow-xl leading-tight">
+          <h1 className="text-white text-2xl lg:text-5xl font-normal drop-shadow-xl leading-tight">
             Create Your AI Clone
           </h1>
 
@@ -220,7 +332,7 @@ export default function AiClonePage() {
 
         {/* VIDEO SECTION */}
         <div className="max-w-7xl mx-auto relative z-10 px-8 md:px-16 lg:px-24 xl:px-32">
-          <div className="relative rounded-[50px] overflow-hidden shadow-[0_35px_90px_rgba(0,0,0,0.6)]" style={{ height: "400px" }}>
+          <div className="relative rounded-[50px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.6)]" style={{ height: "400px" }}>
 
             <video
               src="/test.mp4"
@@ -247,7 +359,7 @@ export default function AiClonePage() {
         {/* Real Estate Section */}
         <div className="mt-12 text-center max-w-4xl mx-auto px-6">
           <motion.h2
-            className="text-white text-xl md:text-base leading-tight mb-6 drop-shadow-lg"
+            className="text-white text-xl md:text-4xl  leading-tight mb-6 drop-shadow-lg"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -259,7 +371,7 @@ export default function AiClonePage() {
           </motion.h2>
 
           <motion.button
-            onClick={() => setIsPurchaseOpen(true)}
+            onClick={routeToProcessFlow}
             className="bg-white text-black rounded-full px-5 py-3 font-semibold text-base hover:scale-[1.03] transition"
             style={{
               boxShadow: "0 0 15px rgba(255,255,255,0.3), 0 0 30px rgba(255,255,255,0.2), 0 20px 60px rgba(0,0,0,0.3)",
@@ -292,16 +404,16 @@ export default function AiClonePage() {
 
       <section className="w-full py-12 bg-black flex flex-col items-center">
   {/* Title */}
-  <h2 className="text-xl md:text-2xl text-white mb-10">
-    Our AI <span className="text-[#D7A059] font-medium">Clones</span>
+  <h2 className="text-4xl md:text-4xl text-white mb-10">
+    Our AI <span className="text-[#D7A059] font-medium text-4xl">Clones</span>
   </h2>
 
   {/* Outer container – center + side space */}
-  <div className="w-full max-w-6xl px-6 md:px-10">
+  <div className="w-full max-w-6xl px-6 md:px-10 sm:px-2">
     {/* Flex row – equal gap between all 4 */}
     <div className="flex flex-wrap md:flex-nowrap justify-center gap-6 md:gap-10">
       {/* Card 1 */}
-      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[230px] md:w-[260px]">
+      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[280px] md:w-[260px]">
         <video
           src="/video.mp4"
           autoPlay
@@ -313,7 +425,7 @@ export default function AiClonePage() {
       </div>
 
       {/* Card 2 */}
-      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[230px] md:w-[260px]">
+      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[280px] md:w-[260px]">
         <video
           src="/video.mp4"
           autoPlay
@@ -325,7 +437,7 @@ export default function AiClonePage() {
       </div>
 
       {/* Card 3 */}
-      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[230px] md:w-[260px]">
+      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[280px] md:w-[260px]">
         <video
           src="/video.mp4"
           autoPlay
@@ -337,7 +449,7 @@ export default function AiClonePage() {
       </div>
 
       {/* Card 4 */}
-      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[230px] md:w-[260px]">
+      <div className="bg-[#111] rounded-3xl overflow-hidden shadow-lg aspect-[9/16] w-[280px] md:w-[260px]">
         <video
           src="/video.mp4"
           autoPlay
@@ -527,7 +639,9 @@ export default function AiClonePage() {
  
            {card.highlight && (
              <button
-               className="mt-3 w-full py-2.5 rounded-full text-black font-semibold text-sm flex items-center justify-center gap-2"
+               onClick={handleCheckout}
+               disabled={isCheckoutLoading}
+               className="mt-3 w-full py-2.5 rounded-full text-black font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                style={{
                  background:
                    "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
@@ -535,16 +649,18 @@ export default function AiClonePage() {
                    "0 0 15px rgba(255,255,255,0.3), 0 0 30px rgba(255,255,255,0.2), 0 16px 40px rgba(0,0,0,0.24), inset 0 6px 18px rgba(255,255,255,0.08)",
                }}
              >
-               <span>Get Your AI Clone At $37</span>
-               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
-                 <path
-                   d="M5 12h14M13 5l6 7-6 7"
-                   stroke="#111827"
-                   strokeWidth="2"
-                   strokeLinecap="round"
-                   strokeLinejoin="round"
-                 />
-               </svg>
+               <span>{isCheckoutLoading ? "Processing..." : "Get Your AI Clone At $37"}</span>
+               {!isCheckoutLoading && (
+                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18">
+                   <path
+                     d="M5 12h14M13 5l6 7-6 7"
+                     stroke="#111827"
+                     strokeWidth="2"
+                     strokeLinecap="round"
+                     strokeLinejoin="round"
+                   />
+                 </svg>
+               )}
              </button>
            )}
          </div>
@@ -576,7 +692,7 @@ export default function AiClonePage() {
             viewport={{ once: true }}
           >
             {/* Headline - Three lines */}
-            <h1 className="text-5xl md:text-5xl font-normal mb-3 text-black leading-tight" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>
+            <h1 className="text-3xl md:text-5xl sm:text-3xl font-normal mb-3 text-black leading-tight" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>
               <div style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>Ready to Transform</div>
               <div style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>
                 <span className="text-black" style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}>Your </span>
@@ -770,15 +886,16 @@ export default function AiClonePage() {
 
                 {/* BUTTON */}
                 <motion.button
-                  onClick={routeToProcessFlow}
+                  onClick={handleCheckout499}
+                  disabled={isCheckoutLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-gray-900 text-sm bg-white shadow-md"
+                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-gray-900 text-sm bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     boxShadow: "0 2px 8px rgba(0,0,0,0.15), 0 0 15px rgba(255,255,255,0.3)",
                   }}
                 >
-                  Purchase Now
+                  {isCheckoutLoading ? "Processing..." : "Purchase Now"}
                 </motion.button>
               </div>
             </motion.div>
@@ -833,15 +950,16 @@ export default function AiClonePage() {
 
                 {/* BUTTON */}
                 <motion.button
-                  onClick={routeToProcessFlow}
+                  onClick={handleCheckout999}
+                  disabled={isCheckoutLoading}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-white text-sm bg-gradient-to-r from-[#C89356] to-[#F59E0B] shadow-md"
+                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-white text-sm bg-gradient-to-r from-[#C89356] to-[#F59E0B] shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     boxShadow: "0 2px 8px rgba(200,147,86,0.4), 0 0 15px rgba(245,158,11,0.3)",
                   }}
                 >
-                  Purchase Now
+                  {isCheckoutLoading ? "Processing..." : "Purchase Now"}
                 </motion.button>
               </div>
             </motion.div>
