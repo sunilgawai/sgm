@@ -15,9 +15,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Missing file or submissionId" }, { status: 400 })
     }
 
+    console.log("file.type:", file.type);
+    console.log("file.name:", file.name);
+    console.log("file.size:", file.size);
+
+    
     // Validate file type
     const ext = file.name.toLowerCase().match(/\.[^.]+$/)
-    const allowedTypes = [".mp4", ".mov"]
+    const allowedTypes = [".mp4", ".mov", ".webm"];
     if (!ext || !allowedTypes.includes(ext[0])) {
       return NextResponse.json({ error: `Invalid file type: ${file.name}` }, { status: 400 })
     }
@@ -47,17 +52,20 @@ export async function POST(request: NextRequest) {
         {
           resource_type: "video",
           folder: `submissions/${submissionId}`,
-          public_id: `${submissionId}/${Date.now()}_${file.name.replace(/\.[^/.]+$/, "")}`,
+          public_id: `${Date.now()}_${file.name.replace(/\.[^/.]+$/, "")}`,
+          // allowed_formats: ["mp4", "mov", "webm"],
+          // folder: `submissions/${submissionId}`,
+          // public_id: `${submissionId}/${Date.now()}_${file.name.replace(/\.[^/.]+$/, "")}`,
         },
         (error, result) => {
           if (error) {
-            console.error("Cloudinary upload error:", error)
-            reject(error)
+            console.error("Cloudinary upload error:", error);
+            reject(error);
           } else {
-            resolve(result)
+            resolve(result);
           }
         }
-      )
+      );
       
       uploadStream.end(buffer)
     })
