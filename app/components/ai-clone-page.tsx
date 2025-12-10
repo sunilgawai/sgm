@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   Gift,
   Info,
+  Pause,
 } from "lucide-react";
 import Footer from "./footer";
 import ProcessFlowSection from "./process-flow-section";
@@ -158,7 +159,9 @@ function FAQAccordion({ faqs }: { faqs: Array<{ q: string; a: string }> }) {
             className="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors text-left"
             aria-expanded={openIndex === idx}
           >
-            <span className="font-semibold text-gray-900">{faq.q}</span>
+            <span className="font-semibold text-base md:text-lg text-gray-900">
+              {faq.q}
+            </span>
             <motion.div
               animate={{ rotate: openIndex === idx ? 180 : 0 }}
               transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
@@ -174,7 +177,7 @@ function FAQAccordion({ faqs }: { faqs: Array<{ q: string; a: string }> }) {
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: prefersReducedMotion ? 0 : 0.3 }}
               >
-                <div className="px-6 py-4 bg-gray-50 text-gray-900 border-t border-gray-200">
+                <div className="px-6 py-4 bg-gray-50 text-gray-900 border-t border-gray-200 text-sm md:text-base">
                   {faq.a}
                 </div>
               </motion.div>
@@ -191,7 +194,6 @@ const routeToProcessFlow = () => {
   if (typeof window !== "undefined") {
     const currentPath = window.location.pathname;
     if (currentPath === "/ai-clone") {
-      // Already on ai-clone page, just scroll to section
       setTimeout(() => {
         const section = document.getElementById("process-flow");
         if (section) {
@@ -199,7 +201,6 @@ const routeToProcessFlow = () => {
         }
       }, 100);
     } else {
-      // Navigate to ai-clone page with hash
       window.location.href = "/ai-clone#process-flow";
     }
   }
@@ -210,15 +211,24 @@ export default function AiClonePage() {
   const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const [isCheckoutLoading499, setIsCheckoutLoading499] = useState(false);
   const [isCheckoutLoading999, setIsCheckoutLoading999] = useState(false);
-  const prefersReducedMotion =
-    typeof window !== "undefined"
-      ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      : false;
+  const [isVideoHovered, setIsVideoHovered] = useState(false);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const toggleVideoPlayback = () => {
+    if (videoRef.current) {
+      if (isVideoPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsVideoPlaying(!isVideoPlaying);
+    }
+  };
 
   const handleCheckout = async () => {
     setIsCheckoutLoading(true);
     try {
-      // First scroll to process flow section
       setTimeout(() => {
         const section = document.getElementById("process-flow");
         if (section) {
@@ -226,7 +236,6 @@ export default function AiClonePage() {
         }
       }, 100);
 
-      // Create Stripe checkout session
       const response = await fetch("/api/v1/checkout/create-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -235,8 +244,8 @@ export default function AiClonePage() {
           amount: 37,
           currency: "usd",
           buyer: {
-            email: "customer@example.com", // Will be collected in Stripe
-            phone: "+1234567890", // Will be updated from Stripe if provided
+            email: "customer@example.com",
+            phone: "+1234567890",
           },
         }),
       });
@@ -244,7 +253,6 @@ export default function AiClonePage() {
       const data = await response.json();
 
       if (data.url) {
-        // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
         console.error(
@@ -272,8 +280,8 @@ export default function AiClonePage() {
           amount: 499,
           currency: "usd",
           buyer: {
-            email: "customer@example.com", // Will be collected in Stripe
-            phone: "+1234567890", // Will be updated from Stripe if provided
+            email: "customer@example.com",
+            phone: "+1234567890",
           },
         }),
       });
@@ -281,7 +289,6 @@ export default function AiClonePage() {
       const data = await response.json();
 
       if (data.url) {
-        // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
         console.error(
@@ -309,8 +316,8 @@ export default function AiClonePage() {
           amount: 999,
           currency: "usd",
           buyer: {
-            email: "customer@example.com", // Will be collected in Stripe
-            phone: "+1234567890", // Will be updated from Stripe if provided
+            email: "customer@example.com",
+            phone: "+1234567890",
           },
         }),
       });
@@ -318,7 +325,6 @@ export default function AiClonePage() {
       const data = await response.json();
 
       if (data.url) {
-        // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
         console.error(
@@ -367,54 +373,73 @@ export default function AiClonePage() {
 
       {/* Hero Section */}
       {/* ================= FIXED HERO SECTION ================= */}
-      <section className="relative bg-[#C89356] overflow-visible z-0 pt-24 pb-25 rounded-b-[80px] md:rounded-b-[120px]">
+      <section className="relative bg-[#C89356] overflow-visible z-0 pt-20 sm:pt-24 md:pt-28 pb-16 sm:pb-20 md:pb-25 rounded-b-[60px] sm:rounded-b-[80px] md:rounded-b-[120px]">
         {/* HEADINGS */}
-        <div className="text-center max-w-4xl mx-auto px-6">
-          <p className="text-white/95 text-xl lg:text-3xl mb-3 font-bold">
+        <div className="text-center max-w-4xl mx-auto px-4 sm:px-6">
+          <p className="text-white/95 text-base sm:text-lg md:text-xl lg:text-2xl mb-3 font-medium">
             No camera. No editing. No tech skills.
           </p>
 
-          <h1 className="text-white text-2xl lg:text-5xl font-normal drop-shadow-xl leading-tight">
+          <h1 className="text-white text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal drop-shadow-xl leading-tight mb-2">
             Create Your AI Clone
           </h1>
 
-          <p className="text-[#0b0b0b] text-xl md:text-xl font-semibold mt-2 mb-10 leading-none">
+          <p className="text-[#0b0b0b] text-base sm:text-lg md:text-xl font-semibold leading-none mb-8 sm:mb-10">
             In Just 30 mins
           </p>
         </div>
 
         {/* VIDEO SECTION */}
-        <div className="max-w-7xl mx-auto relative z-10 px-8 md:px-16 lg:px-24 xl:px-32">
-          <div
-            className="relative rounded-[50px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.6)]"
-            style={{ height: "400px" }}
-          >
-            <video
-              src="https://res.cloudinary.com/dnhbh2owd/video/upload/v1765114222/test_bfhqve.mp4"
-              autoPlay
-              muted
-              loop
-              playsInline
-              className="w-full h-full object-cover rounded-[50px]"
-              style={{ height: "400px" }}
-            />
-
-            {/* Bottom Vignette */}
+        <div className="max-w-7xl mx-auto relative z-10 px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32">
+          <div className="relative rounded-[30px] sm:rounded-[40px] md:rounded-[50px] overflow-hidden shadow-[0_15px_40px_rgba(0,0,0,0.6)]">
             <div
-              className="absolute inset-x-0 bottom-0 rounded-b-[50px]"
-              style={{
-                height: "150px",
-                background:
-                  "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.9) 100%)",
-              }}
-            />
+              className="relative w-full"
+              style={{ paddingTop: "56.25%" }}
+              onMouseEnter={() => setIsVideoHovered(true)}
+              onMouseLeave={() => setIsVideoHovered(false)}
+            >
+              <video
+                ref={videoRef}
+                src="https://res.cloudinary.com/dnhbh2owd/video/upload/v1765114222/test_bfhqve.mp4"
+                autoPlay
+                muted
+                loop
+                playsInline
+                className="absolute top-0 left-0 w-full h-full object-cover rounded-[30px] sm:rounded-[40px] md:rounded-[50px]"
+              />
+
+              {/* Play/Pause Button Overlay - Only visible on hover */}
+              <button
+                onClick={toggleVideoPlayback}
+                className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center hover:bg-black/60 transition-all duration-300 z-20 ${
+                  isVideoHovered ? "opacity-100" : "opacity-0"
+                }`}
+                aria-label={isVideoPlaying ? "Pause video" : "Play video"}
+              >
+                {isVideoPlaying ? (
+                  <Pause className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white" />
+                ) : (
+                  <Play className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-white ml-1" />
+                )}
+              </button>
+
+              {/* Bottom Vignette */}
+              <div
+                className="absolute inset-x-0 bottom-0 rounded-b-[30px] sm:rounded-[40px] md:rounded-b-[50px] pointer-events-none"
+                style={{
+                  height: "150px",
+                  background:
+                    "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.65) 60%, rgba(0,0,0,0.9) 100%)",
+                }}
+              />
+            </div>
           </div>
         </div>
 
         {/* Real Estate Section */}
-        <div className="mt-12 text-center max-w-4xl mx-auto px-6">
+        <div className="mt-10 sm:mt-12 md:mt-16 text-center max-w-4xl mx-auto px-4 sm:px-6">
           <motion.h2
-            className="text-white text-xl md:text-4xl  leading-tight mb-6 drop-shadow-lg"
+            className="text-white text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-tight mb-6 drop-shadow-lg font-normal"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
@@ -423,14 +448,14 @@ export default function AiClonePage() {
             Real Estate Agents Are
             <br /> Using AI To Get
             <br />
-            <span className="text-base md:text-xl text-black font-medium">
+            <span className="text-base sm:text-lg md:text-xl font-medium text-black">
               3x More Luxury Listings
             </span>
           </motion.h2>
 
           <motion.button
             onClick={routeToProcessFlow}
-            className="bg-white text-black rounded-full px-5 py-3 font-semibold text-base hover:scale-[1.03] transition"
+            className="bg-white text-black rounded-full px-6 sm:px-8 py-3 font-semibold text-sm sm:text-base md:text-lg hover:scale-[1.03] transition"
             style={{
               boxShadow:
                 "0 0 15px rgba(255,255,255,0.3), 0 0 30px rgba(255,255,255,0.2), 0 20px 60px rgba(0,0,0,0.3)",
@@ -451,7 +476,7 @@ export default function AiClonePage() {
         </div>
 
         {/* LARGE ROUNDED BOTTOM CURVE */}
-        <div className="absolute left-0 right-0 bottom-0 -z-10 h-[300px] overflow-hidden">
+        <div className="absolute left-0 right-0 bottom-0 -z-10 h-[200px] sm:h-[250px] md:h-[300px] overflow-hidden">
           <svg
             viewBox="0 0 1920 300"
             preserveAspectRatio="none"
@@ -463,21 +488,24 @@ export default function AiClonePage() {
       </section>
       {/* ================= END HERO SECTION ================= */}
 
-      <section className="w-full py-20 bg-black flex flex-col items-center">
+      {/* AI Clones Section */}
+      <section className="w-full py-12 md:py-16 lg:py-20 bg-black flex flex-col items-center px-4 sm:px-6">
         {/* Title */}
-        <div className="flex justify-center gap-4">
-          <h2 className="text-5xl md:text-5xl text-white mb-10">Our AI </h2>
-          <h1 className="text-[#D7A059] font-medium text-5xl md:text-5xl">
+        <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 mb-8 md:mb-10">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl text-white">
+            Our AI
+          </h2>
+          <h1 className="text-[#D7A059] font-medium text-3xl sm:text-4xl md:text-5xl">
             Clones
           </h1>
         </div>
 
-        {/* Outer container – center + side space */}
-        <div className="w-full max-w-6xl md:px-10 sm:px-1">
-          {/* Flex row – equal gap between all 4 */}
-          <div className="flex flex-wrap md:flex-nowrap justify-center gap-4 md:gap-4">
+        {/* Outer container */}
+        <div className="w-full max-w-6xl">
+          {/* Grid layout for responsive design */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4 justify-items-center">
             {/* Card 1 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg aspect-9/16 w-[360px] md:w-[260px]">
+            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
               <iframe
                 src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
                 className="w-full h-full"
@@ -487,7 +515,7 @@ export default function AiClonePage() {
             </div>
 
             {/* Card 2 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg aspect-9/16 w-[360px] md:w-[260px]">
+            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
               <iframe
                 src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
                 className="w-full h-full"
@@ -497,7 +525,7 @@ export default function AiClonePage() {
             </div>
 
             {/* Card 3 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg aspect-9/16 w-[360px] md:w-[260px]">
+            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
               <iframe
                 src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
                 className="w-full h-full"
@@ -507,7 +535,7 @@ export default function AiClonePage() {
             </div>
 
             {/* Card 4 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg aspect-9/16 w-[360px] md:w-[260px]">
+            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
               <iframe
                 src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
                 className="w-full h-full"
@@ -519,29 +547,29 @@ export default function AiClonePage() {
         </div>
       </section>
 
-      {/* Compare Options Section (adjusted widths/heights & subtler accents) */}
-      <section className="py-12 px-2 sm:px-4 lg:px-6 bg-white">
+      {/* Compare Options Section */}
+      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-8"
+            className="text-center mb-8 md:mb-12"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="flex flex-col items-center mb-3 gap-4">
-              <h2 className="text-5xl md:text-4xl text-gray-900">
+            <div className="flex flex-col items-center mb-4 gap-2 md:gap-4">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl text-gray-900">
                 Compare Your
               </h2>
-              <h2 className="text-5xl md:text-4xl text-[#C89356] -mt-2">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl text-[#C89356] -mt-2">
                 Options
               </h2>
             </div>
-            <p className="text-lg font-medium text-gray-700">
+            <p className="text-base sm:text-lg md:text-xl font-medium text-gray-700">
               See why 500+ agents choose the smart way.
             </p>
           </motion.div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mx-auto max-w-5xl items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mx-auto max-w-5xl items-stretch">
             {[
               {
                 title: "OLD WAY",
@@ -623,7 +651,7 @@ export default function AiClonePage() {
               >
                 {/* badge - top right */}
                 <div
-                  className={`absolute -top-4 right-4 z-20 px-4 py-1 rounded-full text-xs font-semibold shadow-md
+                  className={`absolute -top-3 right-4 z-20 px-3 md:px-4 py-1 rounded-full text-xs font-semibold shadow-md
         ${
           card.highlight ? "bg-[#F4B547] text-black" : "bg-[#C89356] text-white"
         }`}
@@ -631,9 +659,9 @@ export default function AiClonePage() {
                   {card.tag}
                 </div>
 
-                {/* inner card: fixed height + flex column */}
-                <div className="relative flex flex-col h-full px-8 pt-10 pb-8 max-w-[360px] mx-auto">
-                  {/* golden gradient in upper right corner only */}
+                {/* inner card */}
+                <div className="relative flex flex-col h-full px-6 md:px-8 pt-8 md:pt-10 pb-6 md:pb-8 max-w-[360px] mx-auto">
+                  {/* golden gradient */}
                   {!card.highlight && (
                     <div
                       aria-hidden
@@ -645,15 +673,15 @@ export default function AiClonePage() {
                     />
                   )}
 
-                  {/* HEADER - Top Left */}
+                  {/* HEADER */}
                   <div className="relative text-left mb-0">
                     <div className="flex items-center gap-3 mb-4">
                       <div
-                        className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0
+                        className={`w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center shrink-0
                ${card.highlight ? "bg-white/20" : "bg-gray-100"}`}
                       >
                         <card.icon
-                          size={28}
+                          size={24}
                           className={
                             card.highlight ? "text-white" : "text-gray-700"
                           }
@@ -661,7 +689,7 @@ export default function AiClonePage() {
                       </div>
                       <div className="flex flex-col">
                         <p
-                          className={`text-md font-medium tracking-wide
+                          className={`text-sm md:text-base font-medium tracking-wide
                             ${
                               card.highlight ? "text-white/90" : "text-gray-700"
                             }`}
@@ -669,7 +697,7 @@ export default function AiClonePage() {
                           {card.title}
                         </p>
                         <p
-                          className={`text-lg font-bold
+                          className={`text-base md:text-lg font-bold
                  ${card.highlight ? "text-white/80" : "text-gray-600"}`}
                         >
                           {idx === 0
@@ -683,11 +711,11 @@ export default function AiClonePage() {
 
                     {/* PRICE PILL */}
                     <div
-                      className={`w-full rounded-xl py-4 flex items-center justify-center shadow-inner mt-0
+                      className={`w-full rounded-xl py-3 md:py-4 flex items-center justify-center shadow-inner mt-0
                         ${card.highlight ? "bg-[#009654]" : "bg-[#F4F4F6]"}`}
                     >
                       <span
-                        className={`text-2xl font-semibold
+                        className={`text-xl md:text-2xl font-semibold
                           ${card.highlight ? "text-white" : "text-gray-900"}`}
                       >
                         {card.price}
@@ -695,7 +723,7 @@ export default function AiClonePage() {
                     </div>
                   </div>
 
-                  {/* FEATURES – flex-1 so footer sticks to bottom */}
+                  {/* FEATURES */}
                   <ul
                     className={`relative mt-4 space-y-2 text-xs leading-relaxed flex-1
            ${card.highlight ? "text-white" : "text-gray-700"}`}
@@ -703,16 +731,16 @@ export default function AiClonePage() {
                     {card.list.map((txt, i) => (
                       <li
                         key={i}
-                        className="flex items-start gap-2.5 text-lg font-medium"
+                        className="flex items-start gap-2.5 text-sm md:text-base font-medium"
                       >
                         <div
-                          className={`w-8 h-8 md:w-5 md:h-5 rounded-full flex items-center justify-center shrink-0 mt-1
+                          className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-1
                             ${card.highlight ? "bg-white/20" : "bg-[#F2F3F5]"}`}
                         >
                           {card.highlight ? (
-                            <Check className="w-4 h-4 md:w-3 md:h-3 text-white" />
+                            <Check className="w-3 h-3 text-white" />
                           ) : (
-                            <XIcon className="w-4 h-4 md:w-3 md:h-3 text-gray-500" />
+                            <XIcon className="w-3 h-3 text-gray-500" />
                           )}
                         </div>
                         <span>{txt}</span>
@@ -720,9 +748,9 @@ export default function AiClonePage() {
                     ))}
                   </ul>
 
-                  {/* FOOTER – always same vertical position because of flex-1 above */}
+                  {/* FOOTER */}
                   <div
-                    className={`pt-3 mt-4 border-t text-center text-xs
+                    className={`pt-3 mt-4 border-t text-center text-xs md:text-sm
            ${
              card.highlight
                ? "border-white/25 text-white/90"
@@ -735,7 +763,7 @@ export default function AiClonePage() {
                       <button
                         onClick={handleCheckout}
                         disabled={isCheckoutLoading}
-                        className="mt-3 w-full py-2.5 rounded-full text-black font-semibold text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="mt-3 w-full py-2.5 rounded-full text-black font-semibold text-xs md:text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                         style={{
                           background:
                             "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
@@ -751,8 +779,8 @@ export default function AiClonePage() {
                         {!isCheckoutLoading && (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
-                            width="18"
-                            height="18"
+                            width="16"
+                            height="16"
                           >
                             <path
                               d="M5 12h14M13 5l6 7-6 7"
@@ -773,12 +801,11 @@ export default function AiClonePage() {
         </div>
       </section>
 
-      {/* The Process Section - Interactive Flow */}
+      {/* The Process Section */}
       <ProcessFlowSection />
 
       {/* Pricing Section */}
-      {/* Compare / Pricing CTA Section — pixel-fit to screenshots */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-3xl mx-auto">
           <motion.div
             className="text-center"
@@ -789,7 +816,7 @@ export default function AiClonePage() {
           >
             {/* Headline - Three lines */}
             <h1
-              className="text-3xl md:text-5xl sm:text-3xl font-normal mb-3 text-black leading-tight"
+              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-normal mb-3 text-black leading-tight"
               style={{ fontFamily: "var(--font-unbounded)", fontWeight: 400 }}
             >
               <div
@@ -844,20 +871,20 @@ export default function AiClonePage() {
             </h1>
 
             {/* Sub-headline */}
-            <p className="text-xl font-medium md:text-lg text-gray-800 mb-6">
+            <p className="text-base sm:text-lg md:text-xl font-medium text-gray-800 mb-6">
               Join 500+ agents who are already using AI to dominate their market
             </p>
 
             {/* Green Bonus Banner */}
             <motion.div
-              className="relative bg-emerald-600 text-white rounded-xl px-6 py-8 mb-6 mx-auto max-w-2xl border-2 border-white/40 shadow-md"
+              className="relative bg-emerald-600 text-white rounded-xl px-6 py-6 md:py-8 mb-6 mx-auto max-w-2xl border-2 border-white/40 shadow-md"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
               viewport={{ once: true }}
             >
-              <div className="flex flex-col items-center justify-center ">
-                <h3 className="text-base md:text-lg font-normal uppercase tracking-wide mb-2">
+              <div className="flex flex-col items-center justify-center">
+                <h3 className="text-sm sm:text-base md:text-lg font-normal uppercase tracking-wide mb-2">
                   🎁 YOUR BONUS IS LOCKED IN!
                 </h3>
                 <div className="text-xs md:text-sm opacity-95 font-normal">
@@ -877,21 +904,21 @@ export default function AiClonePage() {
             >
               <div className="text-center" style={{ width: "100%" }}>
                 <div
-                  className="text-gray-900 text-sm mb-3 font-normal"
+                  className="text-gray-900 text-xs sm:text-sm mb-3 font-normal"
                   style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}
                 >
                   Total Value: <span className="line-through">$2,085</span>
                 </div>
 
                 <div
-                  className="text-4xl md:text-5xl font-normal text-gray-900 mb-3 leading-none"
+                  className="text-3xl sm:text-4xl md:text-5xl font-normal text-gray-900 mb-3 leading-none"
                   style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}
                 >
                   $37
                 </div>
 
                 <div
-                  className="text-emerald-600 font-normal text-sm mb-3"
+                  className="text-emerald-600 font-normal text-xs sm:text-sm mb-3"
                   style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}
                 >
                   98% OFF – BLACK FRIDAY ONLY
@@ -906,17 +933,15 @@ export default function AiClonePage() {
               </div>
             </motion.div>
 
-            {/* Gold pill CTA (pixel-match gradient + soft glow) */}
+            {/* Gold pill CTA */}
             <motion.button
               onClick={routeToProcessFlow}
-              className="mx-auto block mt-2 mb-12 rounded-full font-semibold"
+              className="mx-auto block mt-2 mb-12 rounded-full font-semibold text-sm sm:text-base md:text-lg"
               style={{
-                // gradient tuned to the screenshot
                 background:
                   "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
                 color: "#111827",
-                padding: "0.9rem 3.2rem",
-                fontSize: "1.05rem",
+                padding: "0.75rem 2rem",
                 boxShadow:
                   "0 0 15px rgba(255,255,255,0.3), 0 0 30px rgba(255,255,255,0.2), 0 18px 36px rgba(227,129,38,0.18), inset 0 6px 18px rgba(255,255,255,0.08)",
               }}
@@ -931,12 +956,12 @@ export default function AiClonePage() {
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center gap-2 md:gap-3">
                 <span>Get Your AI Clone At $37</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  width="20"
-                  height="20"
+                  width="18"
+                  height="18"
                   viewBox="0 0 24 24"
                   fill="none"
                   aria-hidden
@@ -955,27 +980,27 @@ export default function AiClonePage() {
         </div>
       </section>
 
-      {/* ================ Compare Options — REPLACE THIS ENTIRE SECTION ================ */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-black text-white">
+      {/* Additional Services Section */}
+      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-black text-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
-            className="text-center mb-10"
+            className="text-center mb-8 md:mb-10"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <div className="flex justify-center">
-              <h2 className="text-2xl md:text-5xl text-white mb-3 tracking-wide">
+            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-white tracking-wide">
                 Select On
               </h2>
-              <h2 className="text-[#C89356] text-2xl md:text-5xl mb-3 tracking-wide">
+              <h2 className="text-[#C89356] text-2xl sm:text-3xl md:text-4xl lg:text-5xl tracking-wide">
                 Top Service
               </h2>
             </div>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8 max-w-5xl mx-auto">
             {/* LEFT CARD — Multiple AI Content Avatar */}
             <motion.div
               className="relative rounded-2xl border-2 border-[#EBCB9A] bg-[#C89356] shadow-[0_4px_12px_rgba(0,0,0,0.08),0_2px_4px_rgba(0,0,0,0.04)] overflow-visible"
@@ -989,11 +1014,11 @@ export default function AiClonePage() {
               viewport={{ once: true }}
             >
               {/* MOST POPULAR BADGE */}
-              <div className="absolute -top-3 left-1/2 z-30 -translate-x-1/2 bg-white text-gray-900 px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg border-2 border-[#EBCB9A]">
+              <div className="absolute -top-3 left-1/2 z-30 -translate-x-1/2 bg-white text-gray-900 px-3 md:px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg border-2 border-[#EBCB9A]">
                 Most Popular
               </div>
 
-              {/* GRID PATTERN IN UPPER RIGHT */}
+              {/* GRID PATTERN */}
               <div
                 aria-hidden
                 className="absolute top-0 right-0 w-32 h-32 opacity-20 pointer-events-none"
@@ -1008,17 +1033,17 @@ export default function AiClonePage() {
 
               <div className="relative h-full w-full rounded-2xl overflow-hidden p-6 pt-8">
                 <div className="text-left mb-4">
-                  <h3 className="text-base font-semibold text-gray-900 mb-2 leading-tight">
+                  <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-2 leading-tight">
                     Multiple AI Content Avatar
                   </h3>
-                  <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                  <p className="text-xs md:text-sm text-gray-700 mb-4 leading-relaxed">
                     Ideal deal for: A consistent pipeline of avatar-led
                     short-form content
                   </p>
 
                   {/* PRICING BOX */}
-                  <div className="bg-white/20 rounded-xl py-4 mb-4 w-full shadow-inner">
-                    <div className="text-2xl font-bold text-gray-900 text-center">
+                  <div className="bg-white/20 rounded-xl py-3 md:py-4 mb-4 w-full shadow-inner">
+                    <div className="text-xl md:text-2xl font-bold text-gray-900 text-center">
                       499 USD
                     </div>
                   </div>
@@ -1028,10 +1053,10 @@ export default function AiClonePage() {
 
                 {/* INCLUDED LIST */}
                 <div className="mb-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-xs md:text-sm">
                     What&apos;s Included
                   </h4>
-                  <ul className="space-y-2.5 text-sm text-gray-800">
+                  <ul className="space-y-2.5 text-xs md:text-sm text-gray-800">
                     {[
                       "Reels Scripting & Creative Direction",
                       "Capture of up to 5 AI Avatar Clones (With Voice, Facial Expression & Body Language Cloning)",
@@ -1040,9 +1065,9 @@ export default function AiClonePage() {
                     ].map((item, i) => (
                       <li
                         key={i}
-                        className="flex items-start gap-2.5 font-semibold text-sm"
+                        className="flex items-start gap-2.5 font-semibold"
                       >
-                        <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-white flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check size={12} className="text-black" />
                         </div>
                         <span className="leading-snug">{item}</span>
@@ -1057,7 +1082,7 @@ export default function AiClonePage() {
                   disabled={isCheckoutLoading499 || isCheckoutLoading999}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-gray-900 text-sm bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-gray-900 text-xs md:text-sm bg-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     boxShadow:
                       "0 2px 8px rgba(0,0,0,0.15), 0 0 15px rgba(255,255,255,0.3)",
@@ -1082,17 +1107,17 @@ export default function AiClonePage() {
             >
               <div className="relative h-full w-full rounded-2xl overflow-hidden p-6">
                 <div className="text-left mb-4">
-                  <h3 className="text-base font-semibold text-gray-900 mb-2 leading-tight">
+                  <h3 className="text-sm md:text-base font-semibold text-gray-900 mb-2 leading-tight">
                     Plug & Play System
                   </h3>
-                  <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                  <p className="text-xs md:text-sm text-gray-700 mb-4 leading-relaxed">
                     Ideal for: Fully managed Avatars + Social Media content
                     management across all channels end-to-end.
                   </p>
 
                   {/* PRICING BOX */}
-                  <div className="bg-gray-100 rounded-xl py-4 mb-4 w-full shadow-inner">
-                    <div className="text-2xl font-bold text-gray-900 text-center">
+                  <div className="bg-gray-100 rounded-xl py-3 md:py-4 mb-4 w-full shadow-inner">
+                    <div className="text-xl md:text-2xl font-bold text-gray-900 text-center">
                       999 USD
                     </div>
                   </div>
@@ -1102,10 +1127,10 @@ export default function AiClonePage() {
 
                 {/* INCLUDED LIST */}
                 <div className="mb-4">
-                  <h4 className="font-semibold text-gray-900 mb-3 text-sm">
+                  <h4 className="font-semibold text-gray-900 mb-3 text-xs md:text-sm">
                     What&apos;s Included
                   </h4>
-                  <ul className="space-y-2.5 text-sm text-gray-700">
+                  <ul className="space-y-2.5 text-xs md:text-sm text-gray-700">
                     {[
                       "Reels Scriptwriting & Monthly content calendar",
                       "Capture of up to 24 custom AI Avatars/Clones (With Voice, Facial Expression & Body Language Cloning)",
@@ -1114,9 +1139,9 @@ export default function AiClonePage() {
                     ].map((item, i) => (
                       <li
                         key={i}
-                        className="flex items-start gap-2.5 font-semibold text-sm"
+                        className="flex items-start gap-2.5 font-semibold"
                       >
-                        <div className="w-5 h-5 rounded-full bg-[#C89356] flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-4 h-4 md:w-5 md:h-5 rounded-full bg-[#C89356] flex items-center justify-center flex-shrink-0 mt-0.5">
                           <Check
                             size={12}
                             className="text-white font-semibold"
@@ -1134,7 +1159,7 @@ export default function AiClonePage() {
                   disabled={isCheckoutLoading499 || isCheckoutLoading999}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-white text-sm bg-gradient-to-r from-[#C89356] to-[#F59E0B] shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="relative w-full mt-4 rounded-full py-2.5 font-semibold text-white text-xs md:text-sm bg-gradient-to-r from-[#C89356] to-[#F59E0B] shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     boxShadow:
                       "0 2px 8px rgba(200,147,86,0.4), 0 0 15px rgba(245,158,11,0.3)",
@@ -1148,10 +1173,8 @@ export default function AiClonePage() {
         </div>
       </section>
 
-      {/* ================ end replacement ================ */}
-
-      {/* ================= Get Results Section — REPLACEMENT ================= */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-[#C89356]">
+      {/* Get Results Section */}
+      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-[#C89356]">
         <div className="max-w-6xl mx-auto">
           <motion.div
             className="relative"
@@ -1161,8 +1184,8 @@ export default function AiClonePage() {
             viewport={{ once: true }}
           >
             {/* big rounded white card */}
-            <div className="relative mx-6 sm:mx-8 lg:mx-12 rounded-[36px] bg-white overflow-hidden border-2 border-white/90 shadow-[0_35px_90px_rgba(0,0,0,0.32)]">
-              {/* decorative soft golden rays (top-left & top-right) */}
+            <div className="relative mx-4 sm:mx-6 md:mx-8 lg:mx-12 rounded-[24px] md:rounded-[36px] bg-white overflow-hidden border-2 border-white/90 shadow-[0_35px_90px_rgba(0,0,0,0.32)]">
+              {/* decorative soft golden rays */}
               <div
                 aria-hidden
                 className="absolute inset-x-0 top-0 pointer-events-none"
@@ -1196,30 +1219,31 @@ export default function AiClonePage() {
                 />
               </div>
 
-              <div className="relative px-6 sm:px-10 lg:px-16 py-20">
+              <div className="relative px-6 sm:px-8 md:px-10 lg:px-16 py-16 md:py-20">
                 {/* Headline */}
                 <h2 className="text-center">
-                  <span className="text-4xl md:text-5xl font-extrabold text-black">
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-black">
                     Get{" "}
                   </span>
                   <span
-                    className="text-4xl md:text-5xl font-extrabold"
+                    className="text-3xl sm:text-4xl md:text-5xl font-extrabold"
                     style={{ color: "#C89356" }}
                   >
                     Results
                   </span>
-                  <span className="text-4xl md:text-5xl font-extrabold text-black">
+                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-black">
                     {" "}
                     Now.
                   </span>
                   {/* small orange heart accent */}
-                  <span className="inline-block align-middle ml-3">
+                  <span className="inline-block align-middle ml-2 md:ml-3">
                     <svg
-                      width="18"
-                      height="18"
+                      width="16"
+                      height="16"
                       viewBox="0 0 24 24"
                       fill="none"
                       aria-hidden
+                      className="w-4 h-4 md:w-5 md:h-5"
                     >
                       <path
                         d="M12 21s-6.716-4.686-9.333-7.104C-0.222 10.84 3.333 6 7.5 8.5 9.354 9.73 12 12 12 12s2.646-2.27 4.5-3.5C20.667 6 24.222 10.84 21.333 13.896 18.716 16.314 12 21 12 21z"
@@ -1229,13 +1253,13 @@ export default function AiClonePage() {
                   </span>
                 </h2>
 
-                <p className="mt-6 text-center text-lg text-gray-600 max-w-2xl mx-auto">
+                <p className="mt-6 text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
                   See your profiles grow, and let&apos;s boost your brand&apos;s
                   earnings together.
                 </p>
 
                 {/* CTA centered */}
-                <div className="mt-10 flex justify-center">
+                <div className="mt-8 md:mt-10 flex justify-center">
                   <motion.button
                     onClick={routeToProcessFlow}
                     whileHover={{
@@ -1244,7 +1268,7 @@ export default function AiClonePage() {
                         "0 0 20px rgba(255,255,255,0.4), 0 0 40px rgba(255,255,255,0.3), 0 28px 60px rgba(227,129,38,0.18), 0 8px 40px rgba(227,129,38,0.12), inset 0 6px 18px rgba(255,255,255,0.08)",
                     }}
                     whileTap={{ scale: 0.98 }}
-                    className="rounded-full px-10 py-4 font-bold text-lg md:text-xl"
+                    className="rounded-full px-6 sm:px-8 md:px-10 py-3 md:py-4 font-bold text-base sm:text-lg md:text-xl"
                     style={{
                       background:
                         "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
@@ -1257,7 +1281,7 @@ export default function AiClonePage() {
                   </motion.button>
                 </div>
 
-                <p className="mt-4 text-center font-semibold text-gray-700">
+                <p className="mt-4 text-center font-semibold text-sm md:text-base text-gray-700">
                   Offer Expiring Soon
                 </p>
               </div>
@@ -1266,13 +1290,11 @@ export default function AiClonePage() {
         </div>
       </section>
 
-      {/* ================= end replacement ================= */}
-
       {/* FAQ Section */}
-      <section className="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-4xl mx-auto">
           <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-4 text-center"
+            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-center"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
@@ -1282,7 +1304,7 @@ export default function AiClonePage() {
             <span className="text-[#C89356]">Questions</span>
           </motion.h2>
           <motion.p
-            className="text-center text-gray-700 mb-12"
+            className="text-center text-sm sm:text-base md:text-lg text-gray-700 mb-8 md:mb-12"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
