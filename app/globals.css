@@ -42,6 +42,9 @@ h1, h2, h3 {
   font-family: var(--font-unbounded), system-ui, sans-serif;
 }
 
+.unbounded {
+  font-family: var(--font-unbounded), system-ui, sans-serif;
+}
 /* Small headings and body text - Satoshi */
 h4, h5, h6, p, span, div, button, a, li, label, input, textarea, select {
   font-family: var(--font-satoshi), system-ui, sans-serif;

@@ -520,14 +520,14 @@ export default function ProcessFlowSection() {
       >
         <div className="max-w-4xl mx-auto">
           <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-16 text-center"
+            className="text-4xl md:text-5xl font-bold mb-16 text-center unbounded"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <span className="text-white">The </span>
-            <span className="text-[#C89356]">Process</span>
+            <span className="text-white unbounded">The </span>
+            <span className="text-[#C89356] unbounded">Process</span>
           </motion.h2>
 
           {/* Desktop Stepper - Horizontal */}
