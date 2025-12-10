@@ -491,7 +491,7 @@ export default function AiClonePage() {
       {/* AI Clones Section */}
       <section className="w-full py-12 md:py-16 lg:py-20 bg-black flex flex-col items-center px-6 sm:px-6">
         {/* Title */}
-        <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 md:mb-10">
+        <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 md:mb-10 mb-8">
           <h2 className="text-3xl sm:text-4xl md:text-5xl text-white">
             Our AI
           </h2>
@@ -1199,16 +1199,16 @@ export default function AiClonePage() {
               <div className="relative px-6 sm:px-8 md:px-10 lg:px-16 py-16 md:py-20">
                 {/* Headline */}
                 <h2 className="text-center font-unbounded">
-                  <span className="text-2xl  unbounded sm:text-4xl md:text-5xl font-extrabold text-black">
+                  <span className="text-2xl  unbounded sm:text-4xl md:text-5xl text-black">
                     Get{" "}
                   </span>
                   <span
-                    className="text-2xl unbounded sm:text-4xl md:text-5xl font-extrabold"
+                    className="text-2xl unbounded sm:text-4xl md:text-5xl"
                     style={{ color: "#C89356" }}
                   >
                     Results
                   </span>
-                  <span className="text-2xl unbounded sm:text-4xl md:text-5xl font-extrabold text-black">
+                  <span className="text-2xl unbounded sm:text-4xl md:text-5xl text-black">
                     {" "}
                     Now.
                   </span>
@@ -1271,7 +1271,7 @@ export default function AiClonePage() {
       <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-4xl mx-auto">
           <motion.h2
-            className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 text-center"
+            className="text-2xl sm:text-4xl md:text-5xl mb-4 text-center"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
