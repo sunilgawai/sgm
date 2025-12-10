@@ -489,9 +489,9 @@ export default function AiClonePage() {
       {/* ================= END HERO SECTION ================= */}
 
       {/* AI Clones Section */}
-      <section className="w-full py-12 md:py-16 lg:py-20 bg-black flex flex-col items-center px-4 sm:px-6">
+      <section className="w-full py-12 md:py-16 lg:py-20 bg-black flex flex-col items-center px-6 sm:px-6">
         {/* Title */}
-        <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 mb-8 md:mb-10">
+        <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 md:mb-10">
           <h2 className="text-3xl sm:text-4xl md:text-5xl text-white">
             Our AI
           </h2>
@@ -502,53 +502,30 @@ export default function AiClonePage() {
 
         {/* Outer container */}
         <div className="w-full max-w-6xl">
-          {/* Grid layout for responsive design */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-4 justify-items-center">
-            {/* Card 1 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
-              <iframe
-                src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
-                className="w-full h-full"
-                allow="autoplay; fullscreen; encrypted-media"
-                allowFullScreen
-              />
-            </div>
-
-            {/* Card 2 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
-              <iframe
-                src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
-                className="w-full h-full"
-                allow="autoplay; fullscreen; encrypted-media"
-                allowFullScreen
-              />
-            </div>
-
-            {/* Card 3 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
-              <iframe
-                src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
-                className="w-full h-full"
-                allow="autoplay; fullscreen; encrypted-media"
-                allowFullScreen
-              />
-            </div>
-
-            {/* Card 4 */}
-            <div className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16]">
-              <iframe
-                src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true"
-                className="w-full h-full"
-                allow="autoplay; fullscreen; encrypted-media"
-                allowFullScreen
-              />
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="bg-[#111] rounded-lg overflow-hidden shadow-lg w-full max-w-[360px] aspect-[9/16] mx-auto relative"
+              >
+                {/* Responsive iframe wrapper */}
+                <iframe
+                  src="https://player.cloudinary.com/embed/?cloud_name=dnhbh2owd&public_id=video_ia98im&profile=cld-default&autoplay=true&loop=true&muted=true&controls=false"
+                  className="absolute inset-0 w-full h-full"
+                  allow="autoplay; fullscreen; encrypted-media"
+                  allowFullScreen
+                  frameBorder="0"
+                  scrolling="no"
+                  title="AI Clone Video"
+                />
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Compare Options Section */}
-      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 md:py-16 lg:py-20 px-6 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="text-center mb-8 md:mb-12"
@@ -805,7 +782,7 @@ export default function AiClonePage() {
       <ProcessFlowSection />
 
       {/* Pricing Section */}
-      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-12 md:py-16 lg:py-20 px-6 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-3xl mx-auto">
           <motion.div
             className="text-center"
@@ -981,7 +958,7 @@ export default function AiClonePage() {
       </section>
 
       {/* Additional Services Section */}
-      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-black text-white">
+      <section className="py-12 md:py-16 lg:py-20 px-6 sm:px-6 lg:px-8 bg-black text-white">
         <div className="max-w-7xl mx-auto">
           <motion.div
             className="text-center mb-8 md:mb-10"
@@ -1174,7 +1151,7 @@ export default function AiClonePage() {
       </section>
 
       {/* Get Results Section */}
-      <section className="py-12 md:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 bg-[#C89356]">
+      <section className="py-12 md:py-16 lg:py-20 px-6 sm:px-6 lg:px-8 bg-[#C89356]">
         <div className="max-w-6xl mx-auto">
           <motion.div
             className="relative"
