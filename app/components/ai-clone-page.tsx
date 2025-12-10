@@ -376,7 +376,7 @@ export default function AiClonePage() {
       <section className="relative bg-[#C89356] overflow-visible z-0 pt-20 sm:pt-24 md:pt-28 pb-16 sm:pb-20 md:pb-25 rounded-b-[60px] sm:rounded-b-[80px] md:rounded-b-[120px]">
         {/* HEADINGS */}
         <div className="text-center max-w-4xl mx-auto px-4 sm:px-6">
-          <p className="text-white/95 text-base sm:text-lg md:text-xl lg:text-2xl mb-3 font-medium">
+          <p className="text-white/95 unbounded text-base sm:text-lg md:text-xl lg:text-2xl mb-3 font-medium">
             No camera. No editing. No tech skills.
           </p>
 
@@ -384,7 +384,7 @@ export default function AiClonePage() {
             Create Your AI Clone
           </h1>
 
-          <p className="text-[#0b0b0b] text-base sm:text-lg md:text-xl font-semibold leading-none mb-8 sm:mb-10">
+          <p className="text-[#0b0b0b] unbounded text-base sm:text-lg md:text-xl font-semibold leading-none mb-8 sm:mb-10">
             In Just 30 mins
           </p>
         </div>
@@ -1221,17 +1221,17 @@ export default function AiClonePage() {
 
               <div className="relative px-6 sm:px-8 md:px-10 lg:px-16 py-16 md:py-20">
                 {/* Headline */}
-                <h2 className="text-center">
-                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-black">
+                <h2 className="text-center font-unbounded">
+                  <span className="text-2xl  unbounded sm:text-4xl md:text-5xl font-extrabold text-black">
                     Get{" "}
                   </span>
                   <span
-                    className="text-3xl sm:text-4xl md:text-5xl font-extrabold"
+                    className="text-2xl unbounded sm:text-4xl md:text-5xl font-extrabold"
                     style={{ color: "#C89356" }}
                   >
                     Results
                   </span>
-                  <span className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-black">
+                  <span className="text-2xl unbounded sm:text-4xl md:text-5xl font-extrabold text-black">
                     {" "}
                     Now.
                   </span>
@@ -1300,8 +1300,8 @@ export default function AiClonePage() {
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
           >
-            <span className="text-gray-900">Frequently Asked </span>
-            <span className="text-[#C89356]">Questions</span>
+            <span className="text-gray-900 unbounded">Frequently Asked </span>
+            <span className="text-[#C89356] unbounded">Questions</span>
           </motion.h2>
           <motion.p
             className="text-center text-sm sm:text-base md:text-lg text-gray-700 mb-8 md:mb-12"
