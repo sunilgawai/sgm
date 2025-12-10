@@ -520,7 +520,7 @@ export default function ProcessFlowSection() {
       >
         <div className="max-w-4xl mx-auto">
           <motion.h2
-            className="text-4xl md:text-5xl font-bold mb-16 text-center unbounded"
+            className="text-4xl md:text-5xl mb-16 text-center unbounded"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             transition={{ duration: 0.8 }}
