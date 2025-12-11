@@ -525,7 +525,7 @@ export default function VideoRecorder({
 
           {/* Recording Indicator */}
           {isRecording && (
-            <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-full z-30">
+            <div className="absolute top-2 left-2 flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full z-30">
               <motion.div
                 animate={{ opacity: [1, 0.3, 1] }}
                 transition={{ duration: 1.5, repeat: Infinity }}
@@ -552,48 +552,48 @@ export default function VideoRecorder({
 
           {/* Recording Instructions Overlay */}
           {isRecording && (
-            <div className="absolute bottom-20 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 z-20">
+            <div className="absolute top-10 left-0 right-0 p-4 z-20">
               <div className="max-w-2xl mx-auto text-center">
-                <p className="text-white text-lg font-semibold mb-2">
-                  Recording in Progress
-                </p>
-                <p className="text-white/90 text-sm">
-                  Speak clearly and maintain eye contact with the camera
-                </p>
+                <div className="bg-white/20 backdrop-blur-md rounded-lg p-4">
+                  <p className="text-white text-lg font-semibold mb-2">
+                    Recording in Progress
+                  </p>
+                  <p className="text-white/90 text-sm">
+                    Speak clearly and maintain eye contact with the camera
+                  </p>
+                </div>
               </div>
             </div>
           )}
-
-          {/* Control Buttons */}
           <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4">
             {!isRecording &&
               countdown === null &&
               !isProcessing &&
               cameraReady && (
                 <>
-                    <motion.button
+                  <motion.button
                     onClick={startCountdown}
                     className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl"
                     style={{
                       background:
-                      "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
+                        "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
                       color: "#111827",
                     }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    >
+                  >
                     <Video size={20} className="md:w-6 md:h-6" />
                     Start Recording
-                    </motion.button>
-                    <motion.button
+                  </motion.button>
+                  <motion.button
                     onClick={onCancel}
                     className="flex items-center gap-2 px-5 py-3 md:px-6 md:py-4 bg-gray-600/90 hover:bg-gray-700 text-white rounded-full font-semibold backdrop-blur-sm text-sm md:text-base"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    >
+                  >
                     <ArrowLeft size={18} className="md:w-5 md:h-5" />
                     Back
-                    </motion.button>
+                  </motion.button>
                 </>
               )}
           </div>
@@ -679,32 +679,32 @@ export default function VideoRecorder({
                   disabled={uploading || uploadSuccess}
                   className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl disabled:opacity-50"
                   style={{
-                  background:
-                    uploading || uploadSuccess
-                    ? "#6B7280"
-                    : "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
-                  color: uploading || uploadSuccess ? "white" : "#111827",
+                    background:
+                      uploading || uploadSuccess
+                        ? "#6B7280"
+                        : "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
+                    color: uploading || uploadSuccess ? "white" : "#111827",
                   }}
                   whileHover={
-                  !uploading && !uploadSuccess ? { scale: 1.05 } : {}
+                    !uploading && !uploadSuccess ? { scale: 1.05 } : {}
                   }
                   whileTap={!uploading && !uploadSuccess ? { scale: 0.95 } : {}}
                 >
                   {uploading ? (
-                  <Loader2 className="animate-spin" size={20} />
+                    <Loader2 className="animate-spin" size={20} />
                   ) : uploadSuccess ? (
-                  <Check size={20} />
-                  ) : (
-                  <>
-                    {uploadAndProceed ? (
-                    <Upload size={20} />
-                    ) : (
                     <Check size={20} />
-                    )}
-                    {uploadAndProceed
-                    ? "Upload & Proceed"
-                    : "Submit Recording"}
-                  </>
+                  ) : (
+                    <>
+                      {uploadAndProceed ? (
+                        <Upload size={20} />
+                      ) : (
+                        <Check size={20} />
+                      )}
+                      {uploadAndProceed
+                        ? "Upload & Proceed"
+                        : "Submit Recording"}
+                    </>
                   )}
                 </motion.button>
                 <motion.button
