@@ -21,6 +21,67 @@ Hi! I’m feeling good today. The lighting is nice and I’m speaking clearly. I
 
 const PACKAGES = [{ id: "ai-clone", name: "Get Your AI Clone", amount: 37 }];
 
+// Optimized SessionData: Only essentials (no buyerInfo or customPrompt—fetch fresh from API)
+interface SessionData {
+  orderId: string;
+  submissionId: string | null;
+  paymentStatus: "pending" | "paid" | "failed";
+  completedSteps: number[];
+  timestamp: number;
+}
+
+const SESSION_STORAGE_KEY = "ai_clone_session";
+const SESSION_EXPIRY_DAYS = 90; // 90 days session validity
+
+// Helper functions
+const saveSession = (data: SessionData) => {
+  try {
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(data));
+    console.log("Session saved:", data);
+  } catch (error) {
+    console.error("Failed to save session:", error);
+  }
+};
+
+const loadSession = (): SessionData | null => {
+  try {
+    const data = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!data) return null;
+
+    const session: SessionData = JSON.parse(data);
+    
+    // Check if session is expired (90 days)
+    const expiryTime = session.timestamp + (SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+    if (Date.now() > expiryTime) {
+      console.log("Session expired, clearing...");
+      clearSession();
+      return null;
+    }
+
+    console.log("Session loaded:", session);
+    return session;
+  } catch (error) {
+    console.error("Failed to load session:", error);
+    return null;
+  }
+};
+
+const clearSession = () => {
+  try {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+    console.log("Session cleared");
+  } catch (error) {
+    console.error("Failed to clear session:", error);
+  }
+};
+
+const updateSession = (updates: Partial<SessionData>) => {
+  const existing = loadSession();
+  if (existing) {
+    saveSession({ ...existing, ...updates });
+  }
+};
+
 async function uploadToCloudinaryChunked(
   file: File,
   uploadParams: any,
@@ -102,6 +163,123 @@ export default function ProcessFlowSection() {
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [videoPreview, setVideoPreview] = useState<string | null>(null);
 
+  // NEW: Flag to prevent multiple auto-restores
+  const [hasAutoRestored, setHasAutoRestored] = useState(false);
+
+  // NEW: Auto-restore session on mount (behind the scenes)
+  useEffect(() => {
+    const existingSession = loadSession();
+    if (
+      existingSession &&
+      existingSession.paymentStatus === "paid" &&
+      !hasAutoRestored
+    ) {
+      // Auto-validate and restore silently
+      autoRestoreSession(existingSession);
+    } else {
+      // No valid session: Proceed to Step 1 (or set flag if already checked)
+      setHasAutoRestored(true);
+    }
+  }, []); // Empty deps: Runs once on mount
+
+  // NEW: Auto-restore function (validates API, restores state, sets correct step—no UI blocks)
+  const autoRestoreSession = async (session: SessionData) => {
+    if (hasAutoRestored) return;
+    setLoading(true); // Brief loading during restore (shows spinner if visible)
+    try {
+      // Validate with API (POST /api/v1/orders/session)
+      const response = await fetch("/api/v1/orders/session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: session.orderId }),
+      });
+
+      const data = await response.json();
+      console.log(`🚀 ~ autoRestoreSession ~ data:`, data);
+
+      if (data.success && data.session.paymentStatus === "paid") {
+        // Restore core state
+        setOrderId(data.session.orderId);
+        setSubmissionId(data.session.submissionId);
+        setPaymentStatus(data.session.paymentStatus);
+        setCompletedSteps(session.completedSteps); // Trust local for steps
+
+        // Fetch fresh buyerInfo and form data
+        if (data.session.buyer) {
+          setBuyerInfo(data.session.buyer);
+          setName(data.session.buyer.name || "");
+          setEmail(data.session.buyer.email || "");
+          setPhone(data.session.buyer.phone || "");
+        }
+
+        // Fetch customPrompt if relevant (e.g., Step 3)
+        if (session.completedSteps.includes(2) && data.session.customPrompt) {
+          setCustomPrompt(data.session.customPrompt);
+        }
+
+        // Auto-set currentStep based on completedSteps
+        let targetStep = 1;
+        if (session.completedSteps.includes(3)) {
+          targetStep = 3;
+        } else if (
+          session.completedSteps.includes(2) ||
+          data.session.hasVideos
+        ) {
+          // Assume hasVideos from API if available
+          targetStep = 3;
+          if (!session.completedSteps.includes(2)) {
+            const newSteps = [...session.completedSteps, 2];
+            setCompletedSteps(newSteps);
+            updateSession({ completedSteps: newSteps });
+          }
+        } else if (session.completedSteps.includes(1)) {
+          targetStep = 2;
+        }
+        setCurrentStep(targetStep);
+
+        // Save refreshed optimized session (no buyerInfo/customPrompt)
+        saveSession({
+          orderId: data.session.orderId,
+          submissionId: data.session.submissionId,
+          paymentStatus: data.session.paymentStatus,
+          completedSteps: session.completedSteps,
+          timestamp: Date.now(),
+        });
+
+        // Scroll to section
+        setTimeout(() => {
+          sectionRef.current?.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }, 300);
+      } else {
+        // Invalid: Clear silently (no error to user)
+        console.log("Invalid session, cleared.");
+        clearSession();
+      }
+    } catch (err) {
+      console.error("Auto-restore error:", err);
+      clearSession();
+    } finally {
+      setLoading(false);
+      setHasAutoRestored(true);
+    }
+  };
+
+  // NEW: Save session whenever critical state changes (optimized: no buyerInfo)
+  useEffect(() => {
+    if (orderId && paymentStatus === "paid") {
+      saveSession({
+        orderId,
+        submissionId,
+        paymentStatus,
+        completedSteps,
+        timestamp: Date.now(),
+      });
+    }
+  }, [orderId, submissionId, paymentStatus, completedSteps]);
+
   // Check for session_id in URL (return from Stripe)
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -179,8 +357,27 @@ export default function ProcessFlowSection() {
         }
 
         if (data.paymentStatus === "paid") {
-          setCompletedSteps([1]);
+          // setCompletedSteps([1]);
+          // setCurrentStep(2);
+          // setTimeout(() => {
+          //   sectionRef.current?.scrollIntoView({
+          //     behavior: "smooth",
+          //     block: "start",
+          //   });
+          // }, 300);
+          const newCompletedSteps = [1];
+          setCompletedSteps(newCompletedSteps);
           setCurrentStep(2);
+
+          // NEW: Save optimized session
+          saveSession({
+            orderId: data.orderId,
+            submissionId: null,
+            paymentStatus: data.paymentStatus,
+            completedSteps: newCompletedSteps,
+            timestamp: Date.now(),
+          });
+
           setTimeout(() => {
             sectionRef.current?.scrollIntoView({
               behavior: "smooth",
@@ -558,7 +755,10 @@ export default function ProcessFlowSection() {
 
       setCompletedSteps((prev) => {
         if (!prev.includes(2)) {
-          return [...prev, 2];
+          const newSteps = [...prev, 2];
+          // NEW: Save session after marking Step 2 complete
+          updateSession({ completedSteps: newSteps });
+          return newSteps;
         }
         return prev;
       });
@@ -630,6 +830,7 @@ export default function ProcessFlowSection() {
     setName("");
     setEmail("");
     setPhone("");
+    setHasAutoRestored(false);
     setFiles([]);
     setUploadedFiles([]);
     if (videoPreview) {
@@ -1493,6 +1694,13 @@ export default function ProcessFlowSection() {
                                   }
 
                                   setCompletedSteps([1, 2, 3]);
+                                  saveSession({
+                                    orderId,
+                                    submissionId,
+                                    paymentStatus,
+                                    completedSteps: [1, 2, 3],
+                                    timestamp: Date.now(),
+                                  });
                                   setError(null);
                                   setTimeout(() => {
                                     sectionRef.current?.scrollIntoView({
@@ -2000,6 +2208,13 @@ export default function ProcessFlowSection() {
                           }
 
                           setCompletedSteps([1, 2, 3]);
+                          saveSession({
+                            orderId,
+                            submissionId,
+                            paymentStatus,
+                            completedSteps: [1, 2, 3],
+                            timestamp: Date.now(),
+                          });
                           setError(null);
                           setTimeout(() => {
                             sectionRef.current?.scrollIntoView({
