@@ -10,6 +10,7 @@ import {
   Check,
   RotateCcw,
   ArrowLeft,
+  Upload,
 } from "lucide-react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
@@ -17,6 +18,8 @@ import { fetchFile, toBlobURL } from "@ffmpeg/util";
 interface VideoRecorderProps {
   onRecordingComplete: (file: File) => void;
   onCancel: () => void;
+  uploadAndProceed?: (file: File) => Promise<string>;
+  onProceed?: (submissionId: string) => void;
   script?: string;
 }
 
@@ -25,6 +28,8 @@ const RECORDING_DURATION = 30; // 30 seconds fixed duration
 export default function VideoRecorder({
   onRecordingComplete,
   onCancel,
+  uploadAndProceed,
+  onProceed,
   script = "",
 }: VideoRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
@@ -41,6 +46,11 @@ export default function VideoRecorder({
   const [recordedVideoUrl, setRecordedVideoUrl] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
+  // New states for upload
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const playbackVideoRef = useRef<HTMLVideoElement>(null);
@@ -363,7 +373,7 @@ export default function VideoRecorder({
     }
   };
 
-  const handleSubmitRecording = () => {
+  const handleSubmitRecording = async () => {
     if (!recordedBlobRef.current) {
       setError("No recording found");
       return;
@@ -391,7 +401,25 @@ export default function VideoRecorder({
       streamRef.current = null;
     }
 
-    onRecordingComplete(file);
+    if (uploadAndProceed && onProceed) {
+      // Integrated upload flow
+      setUploading(true);
+      setUploadError(null);
+      setUploadSuccess(false);
+      try {
+        const submissionId = await uploadAndProceed(file);
+        setUploadSuccess(true);
+        setTimeout(() => {
+          onProceed(submissionId);
+        }, 1500);
+      } catch (err: any) {
+        setUploadError(err.message || "Upload failed. Please try again.");
+        setUploading(false);
+      }
+    } else {
+      // Fallback to old flow
+      onRecordingComplete(file);
+    }
   };
 
   const handleRetake = () => {
@@ -405,6 +433,11 @@ export default function VideoRecorder({
     setRecordingTime(RECORDING_DURATION);
     setCameraReady(false); // Reset to show loading overlay briefly during remount
     setError(null);
+    // Reset upload states
+    setUploading(false);
+    setUploadProgress(0);
+    setUploadError(null);
+    setUploadSuccess(false);
 
     // Restart camera if needed
     if (!streamRef.current) {
@@ -430,15 +463,18 @@ export default function VideoRecorder({
 
   return (
     <div className={containerClass} style={containerStyle}>
-      {error && (
+      {(error || uploadError) && (
         <div className="absolute top-4 left-4 right-4 z-50 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
           <button
-            onClick={() => setError(null)}
+            onClick={() => {
+              setError(null);
+              setUploadError(null);
+            }}
             className="absolute top-2 right-2 text-red-700 hover:text-red-900"
           >
             <X size={16} />
           </button>
-          {error}
+          {uploadError || error}
         </div>
       )}
 
@@ -505,9 +541,6 @@ export default function VideoRecorder({
           {cameraReady && recordingStage === "preview" && script && (
             <div className="absolute top-20 left-0 right-0  to-transparent p-6 z-20">
               <div className="max-w-3xl mx-auto">
-                {/* <h3 className="text-white font-bold text-lg mb-3 text-center">
-                  Follow This Script:
-                </h3> */}
                 <div className="bg-black/20 rounded-lg p-4 backdrop-blur-sm border border-white/20">
                   <p className="text-white text-sm md:text-base leading-relaxed whitespace-pre-line text-center">
                     {script}
@@ -595,6 +628,45 @@ export default function VideoRecorder({
             className="w-full h-full object-contain"
           />
 
+          {/* Upload Progress Overlay */}
+          {uploading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
+              <div className="text-center w-full max-w-md">
+                <Loader2
+                  className="mx-auto mb-4 text-white animate-spin"
+                  size={48}
+                />
+                <p className="text-white text-xl font-semibold mb-4">
+                  Uploading Video...
+                </p>
+                <div className="w-full bg-gray-700 rounded-full h-2.5 mb-2">
+                  <div
+                    className="bg-gradient-to-r from-[#F6C066] to-[#E38826] h-2.5 rounded-full transition-all duration-300"
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
+                <p className="text-white/70 text-sm">
+                  {uploadProgress}% Complete
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Upload Success Overlay */}
+          {uploadSuccess && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
+              <div className="text-center w-full max-w-md">
+                <Check className="mx-auto mb-4 text-green-500" size={48} />
+                <p className="text-white text-xl font-semibold mb-4">
+                  Upload Complete!
+                </p>
+                <p className="text-white/70 text-sm">
+                  Proceeding to next step...
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Playback Controls Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-6 z-30">
             <div className="max-w-2xl mx-auto">
@@ -604,23 +676,43 @@ export default function VideoRecorder({
               <div className="flex items-center justify-center gap-4">
                 <motion.button
                   onClick={handleSubmitRecording}
-                  className="flex items-center gap-2 px-8 py-4 rounded-full font-bold text-lg shadow-2xl"
+                  disabled={uploading || uploadSuccess}
+                  className="flex items-center gap-2 px-8 py-4 rounded-full font-bold text-lg shadow-2xl disabled:opacity-50"
                   style={{
                     background:
-                      "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
+                      uploading || uploadSuccess
+                        ? "#6B7280"
+                        : "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
                     color: "white",
                   }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  whileHover={
+                    !uploading && !uploadSuccess ? { scale: 1.05 } : {}
+                  }
+                  whileTap={!uploading && !uploadSuccess ? { scale: 0.95 } : {}}
                 >
-                  <Check size={24} />
-                  Submit Recording
+                  {uploading ? (
+                    <Loader2 className="animate-spin" size={24} />
+                  ) : uploadSuccess ? (
+                    <Check size={24} />
+                  ) : (
+                    <>
+                      {uploadAndProceed ? (
+                        <Upload size={24} />
+                      ) : (
+                        <Check size={24} />
+                      )}
+                      {uploadAndProceed
+                        ? "Upload & Proceed"
+                        : "Submit Recording"}
+                    </>
+                  )}
                 </motion.button>
                 <motion.button
                   onClick={handleRetake}
-                  className="flex items-center gap-2 px-6 py-4 bg-gray-600 hover:bg-gray-700 text-white rounded-full font-semibold"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
+                  disabled={uploading}
+                  className="flex items-center gap-2 px-6 py-4 bg-gray-600 hover:bg-gray-700 text-white rounded-full font-semibold disabled:opacity-50"
+                  whileHover={!uploading ? { scale: 1.05 } : {}}
+                  whileTap={!uploading ? { scale: 0.95 } : {}}
                 >
                   <RotateCcw size={20} />
                   Retake
