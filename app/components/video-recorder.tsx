@@ -673,7 +673,7 @@ export default function VideoRecorder({
             )}
 
             {isRecording && (
-              <div className="absolute top-20 left-0 right-0 p-4 z-20">
+              <div className="absolute top-10 left-0 right-0 p-4 z-20">
                 <div className="max-w-2xl mx-auto text-center">
                   <div className="bg-white/20 backdrop-blur-md rounded-lg p-4">
                     <p className="text-white text-lg font-semibold mb-2">
