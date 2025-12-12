@@ -453,275 +453,306 @@ export default function VideoRecorder({
       .padStart(2, "0")}`;
   };
 
-  const containerClass = isMobile
-    ? "fixed inset-0 z-[9999] bg-black"
-    : "relative mx-auto bg-black rounded-lg overflow-hidden";
-
-  const containerStyle = isMobile
-    ? { width: "100vw", height: "100vh" }
-    : { width: "70vw", maxWidth: "1200px", aspectRatio: "16/9" };
+  // ========== KEY CHANGES BELOW ==========
+  // Modal backdrop and container styling - consistent fullscreen experience
+  // Mobile: fullscreen
+  // Desktop: 85% centered modal with backdrop
 
   return (
-    <div className={containerClass} style={containerStyle}>
-      {(error || uploadError) && (
-        <div className="absolute top-4 left-4 right-4 z-50 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-          <button
-            onClick={() => {
-              setError(null);
-              setUploadError(null);
-            }}
-            className="absolute top-2 right-2 text-red-700 hover:text-red-900"
-          >
-            <X size={16} />
-          </button>
-          {uploadError || error}
-        </div>
+    <>
+      {/* Modal Backdrop - Only visible on desktop, clicking it closes the modal */}
+      {!isMobile && (
+        <div
+          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9998]"
+          onClick={onCancel}
+        />
       )}
 
-      {/* Preview/Recording Stage */}
-      {recordingStage !== "playback" && (
-        <div className="relative w-full h-full">
-          <video
-            ref={videoRefCallback}
-            playsInline
-            muted
-            className="w-full h-full object-cover"
-          />
+      {/* Modal Container */}
+      <div
+        className={`fixed z-[9999] bg-black ${
+          isMobile
+            ? "inset-0"
+            : "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl overflow-hidden shadow-2xl"
+        }`}
+        style={
+          isMobile
+            ? { width: "100vw", height: "100vh" }
+            : {
+                width: "85vw",
+                height: "85vh",
+                maxWidth: "1400px",
+                maxHeight: "900px",
+              }
+        }
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+      >
+        {(error || uploadError) && (
+          <div className="absolute top-4 left-4 right-4 z-50 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+            <button
+              onClick={() => {
+                setError(null);
+                setUploadError(null);
+              }}
+              className="absolute top-2 right-2 text-red-700 hover:text-red-900"
+            >
+              <X size={16} />
+            </button>
+            {uploadError || error}
+          </div>
+        )}
 
-          {/* Camera Loading Overlay */}
-          {!cameraReady && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-              <div className="text-center">
-                <Loader2
-                  className="mx-auto mb-2 text-white animate-spin"
-                  size={48}
-                />
-                <p className="text-white text-sm">Initializing camera...</p>
+        {/* Preview/Recording Stage */}
+        {recordingStage !== "playback" && (
+          <div className="relative w-full h-full">
+            <video
+              ref={videoRefCallback}
+              playsInline
+              muted
+              className="w-full h-full object-cover"
+            />
+
+            {/* Camera Loading Overlay */}
+            {!cameraReady && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                <div className="text-center">
+                  <Loader2
+                    className="mx-auto mb-2 text-white animate-spin"
+                    size={48}
+                  />
+                  <p className="text-white text-sm">Initializing camera...</p>
+                </div>
               </div>
-            </div>
-          )}
-
-          {/* Countdown Overlay */}
-          <AnimatePresence>
-            {countdown !== null && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.5 }}
-                className="absolute inset-0 flex items-center justify-center bg-black/50 z-40"
-              >
-                <motion.div
-                  key={countdown}
-                  initial={{ scale: 0.5, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 1.5, opacity: 0 }}
-                  className="text-white text-9xl font-bold"
-                >
-                  {countdown}
-                </motion.div>
-              </motion.div>
             )}
-          </AnimatePresence>
 
-          {/* Recording Indicator */}
-          {isRecording && (
-            <div className="absolute top-2 left-2 flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full z-30">
-              <motion.div
-                animate={{ opacity: [1, 0.3, 1] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                className="w-3 h-3 bg-white rounded-full"
-              />
-              <span className="font-bold text-lg">
-                {formatTime(recordingTime)}
-              </span>
+            {/* Countdown Overlay */}
+            <AnimatePresence>
+              {countdown !== null && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.5 }}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 z-40"
+                >
+                  <motion.div
+                    key={countdown}
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 1.5, opacity: 0 }}
+                    className="text-white text-9xl font-bold"
+                  >
+                    {countdown}
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Recording Indicator */}
+            {isRecording && (
+              <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-600/90 backdrop-blur-md text-white px-4 py-2 rounded-full z-30">
+                <motion.div
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                  className="w-3 h-3 bg-white rounded-full"
+                />
+                <span className="font-bold text-lg">
+                  {formatTime(recordingTime)}
+                </span>
+              </div>
+            )}
+
+            {/* Script Instructions Overlay */}
+            {cameraReady && recordingStage === "preview" && script && (
+              <div className="absolute top-20 left-0 right-0 p-6 z-20">
+                <div className="max-w-3xl mx-auto">
+                  <div className="bg-black/30 rounded-lg p-4 backdrop-blur-sm border border-white/20">
+                    <p className="text-white text-sm md:text-base leading-relaxed whitespace-pre-line text-center">
+                      {script}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Recording Instructions Overlay */}
+            {isRecording && (
+              <div className="absolute top-20 left-0 right-0 p-4 z-20">
+                <div className="max-w-2xl mx-auto text-center">
+                  <div className="bg-white/20 backdrop-blur-md rounded-lg p-4">
+                    <p className="text-white text-lg font-semibold mb-2">
+                      Recording in Progress
+                    </p>
+                    <p className="text-white/90 text-sm">
+                      Speak clearly and maintain eye contact with the camera
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Control Buttons */}
+            <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4">
+              {!isRecording &&
+                countdown === null &&
+                !isProcessing &&
+                cameraReady && (
+                  <>
+                    <motion.button
+                      onClick={startCountdown}
+                      className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl"
+                      style={{
+                        background:
+                          "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
+                        color: "#111827",
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Video size={20} className="md:w-6 md:h-6" />
+                      Start Recording
+                    </motion.button>
+                    <motion.button
+                      onClick={onCancel}
+                      className="flex items-center gap-2 px-5 py-3 md:px-6 md:py-4 bg-gray-600/90 hover:bg-gray-700 text-white rounded-full font-semibold backdrop-blur-sm text-sm md:text-base"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <ArrowLeft size={18} className="md:w-5 md:h-5" />
+                      Back
+                    </motion.button>
+                  </>
+                )}
             </div>
-          )}
 
-          {/* Script Instructions Overlay */}
-          {cameraReady && recordingStage === "preview" && script && (
-            <div className="absolute top-20 left-0 right-0  to-transparent p-6 z-20">
-              <div className="max-w-3xl mx-auto">
-                <div className="bg-black/20 rounded-lg p-4 backdrop-blur-sm border border-white/20">
-                  <p className="text-white text-sm md:text-base leading-relaxed whitespace-pre-line text-center">
-                    {script}
+            {/* Processing Overlay */}
+            {isProcessing && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
+                <div className="text-center">
+                  <Loader2
+                    className="mx-auto mb-4 text-white animate-spin"
+                    size={64}
+                  />
+                  <p className="text-white text-xl font-semibold mb-2">
+                    {processingStep === "encoding"
+                      ? "Finalizing recording..."
+                      : "Enhancing video quality..."}
+                  </p>
+                  <p className="text-white/70 text-sm">
+                    This may take a moment
                   </p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
+        )}
 
-          {/* Recording Instructions Overlay */}
-          {isRecording && (
-            <div className="absolute top-10 left-0 right-0 p-4 z-20">
-              <div className="max-w-2xl mx-auto text-center">
-                <div className="bg-white/20 backdrop-blur-md rounded-lg p-4">
-                  <p className="text-white text-lg font-semibold mb-2">
-                    Recording in Progress
+        {/* Playback Stage */}
+        {recordingStage === "playback" && recordedVideoUrl && (
+          <div className="relative w-full h-full bg-black">
+            <video
+              ref={playbackVideoRef}
+              src={recordedVideoUrl}
+              controls
+              className="w-full h-full object-contain"
+            />
+
+            {/* Upload Progress Overlay */}
+            {uploading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
+                <div className="text-center w-full max-w-md px-4">
+                  <Loader2
+                    className="mx-auto mb-4 text-white animate-spin"
+                    size={48}
+                  />
+                  <p className="text-white text-xl font-semibold mb-4">
+                    Uploading Video...
                   </p>
-                  <p className="text-white/90 text-sm">
-                    Speak clearly and maintain eye contact with the camera
+                  <div className="w-full bg-gray-700 rounded-full h-2.5 mb-2">
+                    <div
+                      className="bg-gradient-to-r from-[#F6C066] to-[#E38826] h-2.5 rounded-full transition-all duration-300"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
+                  <p className="text-white/70 text-sm">
+                    {uploadProgress}% Complete
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-          <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4">
-            {!isRecording &&
-              countdown === null &&
-              !isProcessing &&
-              cameraReady && (
-                <>
+            )}
+
+            {/* Upload Success Overlay */}
+            {uploadSuccess && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
+                <div className="text-center w-full max-w-md px-4">
+                  <Check className="mx-auto mb-4 text-green-500" size={48} />
+                  <p className="text-white text-xl font-semibold mb-4">
+                    Upload Complete!
+                  </p>
+                  <p className="text-white/70 text-sm">
+                    Proceeding to next step...
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Playback Controls Overlay */}
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-6 z-30">
+              <div className="max-w-2xl mx-auto">
+                <p className="text-white text-center font-semibold text-lg mb-4">
+                  Review Your Recording
+                </p>
+                <div className="flex items-center justify-center gap-4">
                   <motion.button
-                    onClick={startCountdown}
-                    className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl"
+                    onClick={handleSubmitRecording}
+                    disabled={uploading || uploadSuccess}
+                    className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl disabled:opacity-50"
                     style={{
                       background:
-                        "linear-gradient(90deg,#F6C066 0%, #F0A43A 50%, #E38826 100%)",
-                      color: "#111827",
+                        uploading || uploadSuccess
+                          ? "#6B7280"
+                          : "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
+                      color: uploading || uploadSuccess ? "white" : "#111827",
                     }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={
+                      !uploading && !uploadSuccess ? { scale: 1.05 } : {}
+                    }
+                    whileTap={
+                      !uploading && !uploadSuccess ? { scale: 0.95 } : {}
+                    }
                   >
-                    <Video size={20} className="md:w-6 md:h-6" />
-                    Start Recording
+                    {uploading ? (
+                      <Loader2 className="animate-spin" size={20} />
+                    ) : uploadSuccess ? (
+                      <Check size={20} />
+                    ) : (
+                      <>
+                        {uploadAndProceed ? (
+                          <Upload size={20} />
+                        ) : (
+                          <Check size={20} />
+                        )}
+                        {uploadAndProceed
+                          ? "Upload & Proceed"
+                          : "Submit Recording"}
+                      </>
+                    )}
                   </motion.button>
                   <motion.button
-                    onClick={onCancel}
-                    className="flex items-center gap-2 px-5 py-3 md:px-6 md:py-4 bg-gray-600/90 hover:bg-gray-700 text-white rounded-full font-semibold backdrop-blur-sm text-sm md:text-base"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    onClick={handleRetake}
+                    disabled={uploading}
+                    className="flex items-center gap-2 px-5 py-3 md:px-6 md:py-4 bg-gray-600/90 hover:bg-gray-700 text-white rounded-full font-semibold backdrop-blur-sm text-sm md:text-base disabled:opacity-50"
+                    whileHover={!uploading ? { scale: 1.05 } : {}}
+                    whileTap={!uploading ? { scale: 0.95 } : {}}
                   >
-                    <ArrowLeft size={18} className="md:w-5 md:h-5" />
-                    Back
+                    <RotateCcw size={18} />
+                    Retake
                   </motion.button>
-                </>
-              )}
-          </div>
-
-          {/* Processing Overlay */}
-          {isProcessing && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
-              <div className="text-center">
-                <Loader2
-                  className="mx-auto mb-4 text-white animate-spin"
-                  size={64}
-                />
-                <p className="text-white text-xl font-semibold mb-2">
-                  {processingStep === "encoding"
-                    ? "Finalizing recording..."
-                    : "Enhancing video quality..."}
-                </p>
-                <p className="text-white/70 text-sm">This may take a moment</p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Playback Stage */}
-      {recordingStage === "playback" && recordedVideoUrl && (
-        <div className="relative w-full h-full bg-black">
-          <video
-            ref={playbackVideoRef}
-            src={recordedVideoUrl}
-            controls
-            className="w-full h-full object-contain"
-          />
-
-          {/* Upload Progress Overlay */}
-          {uploading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
-              <div className="text-center w-full max-w-md">
-                <Loader2
-                  className="mx-auto mb-4 text-white animate-spin"
-                  size={48}
-                />
-                <p className="text-white text-xl font-semibold mb-4">
-                  Uploading Video...
-                </p>
-                <div className="w-full bg-gray-700 rounded-full h-2.5 mb-2">
-                  <div
-                    className="bg-gradient-to-r from-[#F6C066] to-[#E38826] h-2.5 rounded-full transition-all duration-300"
-                    style={{ width: `${uploadProgress}%` }}
-                  />
                 </div>
-                <p className="text-white/70 text-sm">
-                  {uploadProgress}% Complete
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Upload Success Overlay */}
-          {uploadSuccess && (
-            <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-40">
-              <div className="text-center w-full max-w-md">
-                <Check className="mx-auto mb-4 text-green-500" size={48} />
-                <p className="text-white text-xl font-semibold mb-4">
-                  Upload Complete!
-                </p>
-                <p className="text-white/70 text-sm">
-                  Proceeding to next step...
-                </p>
-              </div>
-            </div>
-          )}
-
-          {/* Playback Controls Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-6 z-30">
-            <div className="max-w-2xl mx-auto">
-              <p className="text-white text-center font-semibold text-lg mb-4">
-                Review Your Recording
-              </p>
-              <div className="flex items-center justify-center gap-4">
-                <motion.button
-                  onClick={handleSubmitRecording}
-                  disabled={uploading || uploadSuccess}
-                  className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl disabled:opacity-50"
-                  style={{
-                    background:
-                      uploading || uploadSuccess
-                        ? "#6B7280"
-                        : "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
-                    color: uploading || uploadSuccess ? "white" : "#111827",
-                  }}
-                  whileHover={
-                    !uploading && !uploadSuccess ? { scale: 1.05 } : {}
-                  }
-                  whileTap={!uploading && !uploadSuccess ? { scale: 0.95 } : {}}
-                >
-                  {uploading ? (
-                    <Loader2 className="animate-spin" size={20} />
-                  ) : uploadSuccess ? (
-                    <Check size={20} />
-                  ) : (
-                    <>
-                      {uploadAndProceed ? (
-                        <Upload size={20} />
-                      ) : (
-                        <Check size={20} />
-                      )}
-                      {uploadAndProceed
-                        ? "Upload & Proceed"
-                        : "Submit Recording"}
-                    </>
-                  )}
-                </motion.button>
-                <motion.button
-                  onClick={handleRetake}
-                  disabled={uploading}
-                  className="flex items-center gap-2 px-5 py-3 md:px-6 md:py-4 bg-gray-600/90 hover:bg-gray-700 text-white rounded-full font-semibold backdrop-blur-sm text-sm md:text-base disabled:opacity-50"
-                  whileHover={!uploading ? { scale: 1.05 } : {}}
-                  whileTap={!uploading ? { scale: 0.95 } : {}}
-                >
-                  <RotateCcw size={18} />
-                  Retake
-                </motion.button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </>
   );
 }
