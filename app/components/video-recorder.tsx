@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useState, useRef, useEffect, useCallback } from "react";
@@ -61,6 +62,89 @@ export default function VideoRecorder({
   const startTimeRef = useRef<number>(0);
   const ffmpegRef = useRef<FFmpeg | null>(null);
   const recordedBlobRef = useRef<Blob | null>(null);
+
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
+  const lineIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const teleprompterLines = [
+    "Hello, I am excited to record this video.",
+    "I'm speaking with confidence and ease.",
+    "The lighting looks great and my voice is clear.",
+    "I'm keeping a warm smile with natural hand movements.",
+    "My face stays well visible as I speak steadily.",
+    "I'm maintaining a calm, natural tone throughout.",
+    "I'm taking gentle pauses between sentences.",
+    "I'm enjoying the process and doing my best.",
+    "I'm staying relaxed and focused as I continue.",
+    "I'm speaking at a comfortable and natural pace.",
+    "I'm keeping my posture open and balanced.",
+    "I'm letting my thoughts flow smoothly and clearly.",
+    "I'm keeping my energy positive and steady.",
+    "I'm staying mindful of my expressions and tone.",
+    "I'm speaking with clarity and calm confidence.",
+    "I'm maintaining eye contact with ease.",
+    "I'm keeping each sentence simple and natural.",
+    "I'm taking my time and staying comfortable.",
+    "I'm allowing my voice to sound warm and friendly.",
+    "I'm staying present and enjoying the moment.",
+    "I'm ending each thought with a gentle pause.",
+  ];
+
+  // Get line duration based on device type
+  const getLineDuration = () => {
+    return isMobile ? 2800 : 2000; // Mobile: 2.8s, Desktop: 2s
+  };
+
+  // Skip to next line
+  const skipToNextLine = () => {
+    if (!isRecording) return;
+    setCurrentLineIndex((prev) => (prev + 1) % teleprompterLines.length);
+
+    // Reset interval to start fresh from new line
+    if (lineIntervalRef.current) {
+      clearInterval(lineIntervalRef.current);
+    }
+    startLineInterval();
+  };
+
+  // Start line interval
+  const startLineInterval = () => {
+    if (lineIntervalRef.current) {
+      clearInterval(lineIntervalRef.current);
+    }
+
+    lineIntervalRef.current = setInterval(() => {
+      setCurrentLineIndex((prev) => (prev + 1) % teleprompterLines.length);
+    }, getLineDuration());
+  };
+
+  useEffect(() => {
+    if (!isRecording) {
+      if (lineIntervalRef.current) {
+        clearInterval(lineIntervalRef.current);
+        lineIntervalRef.current = null;
+      }
+      return;
+    }
+
+    startLineInterval();
+
+    // Keyboard shortcut: Space or Arrow Right to skip line
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if ((e.code === "Space" || e.code === "ArrowRight") && isRecording) {
+        e.preventDefault();
+        skipToNextLine();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+      if (lineIntervalRef.current) {
+        clearInterval(lineIntervalRef.current);
+      }
+    };
+  }, [isRecording, isMobile]);
 
   // Callback ref for the live video element to handle remounting (e.g., after retake)
   const videoRefCallback = useCallback(
@@ -453,6 +537,14 @@ export default function VideoRecorder({
       .padStart(2, "0")}`;
   };
 
+  useEffect(() => {
+    // Prevent body scroll when recorder is open
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   // ========== KEY CHANGES BELOW ==========
   // Modal backdrop and container styling - consistent fullscreen experience
   // Mobile: fullscreen
@@ -464,7 +556,12 @@ export default function VideoRecorder({
       {!isMobile && (
         <div
           className="fixed inset-0 w-screen h-screen bg-black/90 backdrop-blur-sm z-[9998]"
-          onClick={onCancel}
+          onClick={(e) => {
+            // Only close if clicking directly on backdrop, not on children
+            if (e.target === e.currentTarget) {
+              onCancel();
+            }
+          }}
           style={{ minHeight: "100vh", minWidth: "100vw" }}
         />
       )}
@@ -575,7 +672,6 @@ export default function VideoRecorder({
               </div>
             )}
 
-            {/* Recording Instructions Overlay */}
             {isRecording && (
               <div className="absolute top-20 left-0 right-0 p-4 z-20">
                 <div className="max-w-2xl mx-auto text-center">
@@ -583,12 +679,65 @@ export default function VideoRecorder({
                     <p className="text-white text-lg font-semibold mb-2">
                       Recording in Progress
                     </p>
-                    <p className="text-white/90 text-sm">
-                      Speak clearly and maintain eye contact with the camera
+
+                    <div className="relative h-20 overflow-hidden">
+                      <style>{`
+                  .teleprompter-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 8px;
+                    transition: transform 0.3s ease-in-out;
+                  }
+
+                  .line {
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1rem;
+                    color: white;
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                  }
+                  `}</style>
+
+                      <div
+                        className="teleprompter-container"
+                        style={{
+                          transform: `translateY(-${currentLineIndex * 48}px)`,
+                        }}
+                      >
+                        {teleprompterLines.map((line, index) => (
+                          <div key={index} className="line">
+                            {line}
+                          </div>
+                        ))}
+                        {/* Repeat lines at the end to create seamless loop */}
+                        {teleprompterLines.map((line, index) => (
+                          <div key={`repeat-${index}`} className="line">
+                            {line}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Skip Line Button/Indicator */}
+                    <p className="text-white/60 text-xs mt-3">
+                      {isMobile
+                        ? "Tap screen or use arrow buttons to skip line"
+                        : "Press SPACE or → to skip line"}
                     </p>
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* Skip Line Touch Area for Mobile */}
+            {isRecording && isMobile && (
+              <div
+                className="absolute inset-0 z-10 cursor-pointer"
+                onClick={skipToNextLine}
+              />
             )}
 
             {/* Control Buttons */}

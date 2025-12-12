@@ -15,9 +15,9 @@ import {
 } from "lucide-react";
 import VideoRecorder from "./video-recorder";
 
-const RECORDING_SCRIPT = `You’re free to talk about anything you like, or you can follow this short sample script.
+const RECORDING_SCRIPT = `Feel free to speak on any topic you prefer, or follow the sample script provided on the next screen.`;
 
-Hi! I’m feeling good today. The lighting is nice and I’m speaking clearly. I’m relaxed and smiling while recording. I’ll talk naturally and move my hands a bit as I speak.`;
+// Hi! I’m feeling good today. The lighting is nice and I’m speaking clearly. I’m relaxed and smiling while recording. I’ll talk naturally and move my hands a bit as I speak.`;
 
 const PACKAGES = [{ id: "ai-clone", name: "Get Your AI Clone", amount: 37 }];
 
