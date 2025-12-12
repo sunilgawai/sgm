@@ -335,6 +335,60 @@ export default function ProcessFlowSection() {
     }
   }, [completedSteps]);
 
+  // const checkPaymentStatus = async (sessionId: string) => {
+  //   setLoading(true);
+  //   try {
+  //     const response = await fetch(
+  //       `/api/v1/orders/confirm?session_id=${sessionId}`
+  //     );
+  //     const data = await response.json();
+
+  //     if (data.orderId) {
+  //       setOrderId(data.orderId);
+  //       setPaymentStatus(data.paymentStatus);
+  //       if (data.buyer) {
+  //         setBuyerInfo(data.buyer);
+  //       }
+
+  //       if (data.paymentStatus === "paid") {
+  //         // setCompletedSteps([1]);
+  //         // setCurrentStep(2);
+  //         // setTimeout(() => {
+  //         //   sectionRef.current?.scrollIntoView({
+  //         //     behavior: "smooth",
+  //         //     block: "start",
+  //         //   });
+  //         // }, 300);
+  //         const newCompletedSteps = [1];
+  //         setCompletedSteps(newCompletedSteps);
+  //         setCurrentStep(2);
+
+  //         // NEW: Save optimized session
+  //         saveSession({
+  //           orderId: data.orderId,
+  //           submissionId: null,
+  //           paymentStatus: data.paymentStatus,
+  //           completedSteps: newCompletedSteps,
+  //           timestamp: Date.now(),
+  //         });
+
+  //         setTimeout(() => {
+  //           sectionRef.current?.scrollIntoView({
+  //             behavior: "smooth",
+  //             block: "start",
+  //           });
+  //         }, 300);
+  //       } else {
+  //         setTimeout(() => checkPaymentStatus(sessionId), 2000);
+  //       }
+  //     }
+  //   } catch (err) {
+  //     console.error("Payment check error:", err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   const checkPaymentStatus = async (sessionId: string) => {
     setLoading(true);
     try {
@@ -351,19 +405,10 @@ export default function ProcessFlowSection() {
         }
 
         if (data.paymentStatus === "paid") {
-          // setCompletedSteps([1]);
-          // setCurrentStep(2);
-          // setTimeout(() => {
-          //   sectionRef.current?.scrollIntoView({
-          //     behavior: "smooth",
-          //     block: "start",
-          //   });
-          // }, 300);
           const newCompletedSteps = [1];
           setCompletedSteps(newCompletedSteps);
           setCurrentStep(2);
 
-          // NEW: Save optimized session
           saveSession({
             orderId: data.orderId,
             submissionId: null,
@@ -460,6 +505,7 @@ export default function ProcessFlowSection() {
           const submissionData = await submissionResponse.json();
           if (submissionData.submissionId) {
             currentSubmissionId = submissionData.submissionId;
+            setSubmissionId(currentSubmissionId);
           } else {
             throw new Error(
               submissionData.error || "Failed to create submission"
@@ -468,17 +514,16 @@ export default function ProcessFlowSection() {
         }
 
         console.log(
-          `Uploading recorded file: ${file.name} (${(
-            file.size /
-            1024 /
-            1024
-          ).toFixed(2)} MB)`
+          `Uploading file: ${file.name} (${(file.size / 1024 / 1024).toFixed(
+            2
+          )} MB)`
         );
 
         const formData = new FormData();
         formData.append("file", file);
         formData.append("submissionId", currentSubmissionId);
 
+        // Simple upload - server handles chunking
         const uploadResponse = await fetch("/api/v1/uploads/upload-video", {
           method: "POST",
           body: formData,
@@ -494,46 +539,9 @@ export default function ProcessFlowSection() {
         }
 
         const uploadData = await uploadResponse.json();
-
-        // Check if we need to use chunked upload
-        if (uploadData.useChunkedUpload) {
-          console.log(`Using chunked upload for large file: ${file.name}`);
-
-          // Perform chunked upload directly to Cloudinary
-          const cloudinaryResult = await uploadToCloudinaryChunked(
-            file,
-            uploadData.uploadParams,
-            (progress) => {
-              setUploadProgress(progress);
-              console.log(`Upload progress: ${progress}%`);
-            }
-          );
-
-          // Finalize the upload on our server
-          const finalizeResponse = await fetch(
-            "/api/v1/uploads/finalize-upload",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                submissionId: currentSubmissionId,
-                uploadResult: cloudinaryResult,
-                filename: file.name,
-                fileSize: file.size,
-              }),
-            }
-          );
-
-          if (!finalizeResponse.ok) {
-            throw new Error("Failed to finalize chunked upload");
-          }
-
-          console.log(`✓ Successfully uploaded (chunked): ${file.name}`);
-        } else {
-          console.log(`✓ Successfully uploaded: ${file.name}`);
-        }
-
+        console.log(`✓ Successfully uploaded: ${file.name}`);
         setUploadProgress(100);
+
         return currentSubmissionId || "";
       } catch (err: any) {
         console.error("Upload error:", err);
@@ -551,7 +559,7 @@ export default function ProcessFlowSection() {
   const handleProceed = useCallback(
     (newSubmissionId: string) => {
       setSubmissionId(newSubmissionId);
-      setUploadedFiles((prev) => [...prev, "recorded-video.webm"]); // Dummy for auto-advance
+      setUploadedFiles((prev) => [...prev, "recorded-video.webm"]);
       setFiles([]);
       if (videoPreview) {
         URL.revokeObjectURL(videoPreview);
@@ -559,7 +567,9 @@ export default function ProcessFlowSection() {
       }
       setCompletedSteps((prev) => {
         if (!prev.includes(2)) {
-          return [...prev, 2];
+          const newSteps = [...prev, 2];
+          updateSession({ completedSteps: newSteps });
+          return newSteps;
         }
         return prev;
       });
@@ -667,7 +677,7 @@ export default function ProcessFlowSection() {
             formData.append("submissionId", currentSubmissionId);
           }
 
-          // First, check if we need chunked upload
+          // Simple upload - server handles chunking
           const uploadResponse = await fetch("/api/v1/uploads/upload-video", {
             method: "POST",
             body: formData,
@@ -684,44 +694,7 @@ export default function ProcessFlowSection() {
           }
 
           const uploadData = await uploadResponse.json();
-
-          // Check if we need to use chunked upload
-          if (uploadData.useChunkedUpload) {
-            console.log(`Using chunked upload for large file: ${file.name}`);
-
-            // Perform chunked upload directly to Cloudinary
-            const cloudinaryResult = await uploadToCloudinaryChunked(
-              file,
-              uploadData.uploadParams,
-              (progress) => {
-                setUploadProgress(progress);
-                console.log(`Upload progress: ${progress}%`);
-              }
-            );
-
-            // Finalize the upload on our server
-            const finalizeResponse = await fetch(
-              "/api/v1/uploads/finalize-upload",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  submissionId: currentSubmissionId,
-                  uploadResult: cloudinaryResult,
-                  filename: file.name,
-                  fileSize: file.size,
-                }),
-              }
-            );
-
-            if (!finalizeResponse.ok) {
-              throw new Error("Failed to finalize chunked upload");
-            }
-
-            console.log(`✓ Successfully uploaded (chunked): ${file.name}`);
-          } else {
-            console.log(`✓ Successfully uploaded: ${file.name}`);
-          }
+          console.log(`✓ Successfully uploaded: ${file.name}`);
 
           successfulUploads.push(file.name);
           setUploadProgress(100);
@@ -749,7 +722,6 @@ export default function ProcessFlowSection() {
       setCompletedSteps((prev) => {
         if (!prev.includes(2)) {
           const newSteps = [...prev, 2];
-          // NEW: Save session after marking Step 2 complete
           updateSession({ completedSteps: newSteps });
           return newSteps;
         }
@@ -770,6 +742,7 @@ export default function ProcessFlowSection() {
       setUploadProgress(0);
     }
   };
+
 
   const handleSaveCustomPrompt = async () => {
     if (!submissionId || !customPrompt.trim()) {
