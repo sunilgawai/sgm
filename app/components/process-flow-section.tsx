@@ -48,9 +48,10 @@ const loadSession = (): SessionData | null => {
     if (!data) return null;
 
     const session: SessionData = JSON.parse(data);
-    
+
     // Check if session is expired (90 days)
-    const expiryTime = session.timestamp + (SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000);
+    const expiryTime =
+      session.timestamp + SESSION_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
     if (Date.now() > expiryTime) {
       clearSession();
       return null;
@@ -187,88 +188,6 @@ export default function ProcessFlowSection() {
     }
   }, []); // Empty deps: Runs once on mount
 
-  // NEW: Auto-restore function (validates API, restores state, sets correct step—no UI blocks)
-  // const autoRestoreSession = async (session: SessionData) => {
-  //   if (hasAutoRestored) return;
-  //   setLoading(true); // Brief loading during restore (shows spinner if visible)
-  //   try {
-  //     // Validate with API (POST /api/v1/orders/session)
-  //     const response = await fetch("/api/v1/orders/session", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({ orderId: session.orderId }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (data.success && data.session.paymentStatus === "paid") {
-  //       // Restore core state
-  //       setOrderId(data.session.orderId);
-  //       setSubmissionId(data.session.submissionId);
-  //       setPaymentStatus(data.session.paymentStatus);
-  //       setCompletedSteps(session.completedSteps); // Trust local for steps
-
-  //       // Fetch fresh buyerInfo and form data
-  //       if (data.session.buyer) {
-  //         setBuyerInfo(data.session.buyer);
-  //         setName(data.session.buyer.name || "");
-  //         setEmail(data.session.buyer.email || "");
-  //         setPhone(data.session.buyer.phone || "");
-  //       }
-
-  //       // Fetch customPrompt if relevant (e.g., Step 3)
-  //       if (session.completedSteps.includes(2) && data.session.customPrompt) {
-  //         setCustomPrompt(data.session.customPrompt);
-  //       }
-
-  //       // Auto-set currentStep based on completedSteps
-  //       let targetStep = 1;
-  //       if (session.completedSteps.includes(3)) {
-  //         targetStep = 3;
-  //       } else if (
-  //         session.completedSteps.includes(2) ||
-  //         data.session.hasVideos
-  //       ) {
-  //         // Assume hasVideos from API if available
-  //         targetStep = 3;
-  //         if (!session.completedSteps.includes(2)) {
-  //           const newSteps = [...session.completedSteps, 2];
-  //           setCompletedSteps(newSteps);
-  //           updateSession({ completedSteps: newSteps });
-  //         }
-  //       } else if (session.completedSteps.includes(1)) {
-  //         targetStep = 2;
-  //       }
-  //       setCurrentStep(targetStep);
-
-  //       // Save refreshed optimized session (no buyerInfo/customPrompt)
-  //       saveSession({
-  //         orderId: data.session.orderId,
-  //         submissionId: data.session.submissionId,
-  //         paymentStatus: data.session.paymentStatus,
-  //         completedSteps: session.completedSteps,
-  //         timestamp: Date.now(),
-  //       });
-
-  //       // Scroll to section
-  //       setTimeout(() => {
-  //         sectionRef.current?.scrollIntoView({
-  //           behavior: "smooth",
-  //           block: "start",
-  //         });
-  //       }, 300);
-  //     } else {
-  //       // Invalid: Clear silently (no error to user)
-  //       clearSession();
-  //     }
-  //   } catch (err) {
-  //     console.error("Auto-restore error:", err);
-  //     clearSession();
-  //   } finally {
-  //     setLoading(false);
-  //     setHasAutoRestored(true);
-  //   }
-  // };
   const autoRestoreSession = async (session: SessionData) => {
     if (hasAutoRestored) return;
     setLoading(true);
@@ -380,29 +299,6 @@ export default function ProcessFlowSection() {
       }, 100);
     }
   }, [currentStep, paymentStatus]);
-
-  // Auto-advance to step 3 when step 2 is completed
-  // useEffect(() => {
-  //   if (
-  //     completedSteps.includes(2) &&
-  //     (uploadedFiles.length > 0 || submissionId) &&
-  //     currentStep !== 3 &&
-  //     !completedSteps.includes(3)
-  //   ) {
-  //     setCurrentStep(3);
-  //     setTimeout(() => {
-  //       const step3Element = document.querySelector('[data-step="3"]');
-  //       if (step3Element) {
-  //         step3Element.scrollIntoView({ behavior: "smooth", block: "start" });
-  //       } else {
-  //         sectionRef.current?.scrollIntoView({
-  //           behavior: "smooth",
-  //           block: "start",
-  //         });
-  //       }
-  //     }, 600);
-  //   }
-  // }, [completedSteps, uploadedFiles.length, submissionId, currentStep]);
 
   // Auto-scroll when step 3 is completed
   useEffect(() => {
@@ -1434,10 +1330,26 @@ export default function ProcessFlowSection() {
                                   <Video size={16} />
                                   Record Your Video
                                 </motion.button>
-                                <p className="text-white text-xs mb-2">OR</p>
                               </div>
                             )}
 
+                            {/* Script Section - COMES AFTER RECORD BUTTON */}
+                            <div className="bg-[#2a2a2a] border border-[#C89356] rounded-lg p-4">
+                              <label className="block text-xs font-semibold text-white mb-2">
+                                Please record yourself following this script:
+                              </label>
+                              <div className="bg-[#1a1a1a] rounded-lg p-3 border border-[#92400E]">
+                                <p className="text-white whitespace-pre-line leading-relaxed text-sm">
+                                  {RECORDING_SCRIPT}
+                                </p>
+                              </div>
+                              <p className="mt-2 text-xs text-white">
+                                Record in a quiet room. Keep camera at eye
+                                level. Speak clearly and naturally.
+                              </p>
+                            </div>
+
+                            <p className="text-white text-xs mb-2 text-center">OR</p>
                             {/* Show either VideoRecorder or Upload Zone */}
                             {recordingMode ? (
                               <VideoRecorder
@@ -1547,7 +1459,7 @@ export default function ProcessFlowSection() {
                                       Uploading...
                                     </span>
                                   ) : (
-                                    "Upload & Proceed to Final Step"
+                                    "Proceed to Step 2"
                                   )}
                                 </motion.button>
                               )}
@@ -1562,21 +1474,6 @@ export default function ProcessFlowSection() {
                                 </p>
                               </div>
                             )}
-
-                            <div className="bg-[#2a2a2a] border border-[#C89356] rounded-lg p-4">
-                              <label className="block text-xs font-semibold text-white mb-2">
-                                Please record yourself following this script:
-                              </label>
-                              <div className="bg-[#1a1a1a] rounded-lg p-3 border border-[#92400E]">
-                                <p className="text-white whitespace-pre-line leading-relaxed text-sm">
-                                  {RECORDING_SCRIPT}
-                                </p>
-                              </div>
-                              <p className="mt-2 text-xs text-white">
-                                Record in a quiet room. Keep camera at eye
-                                level. Speak clearly and naturally.
-                              </p>
-                            </div>
                           </div>
                         </div>
                       )}
@@ -1970,10 +1867,26 @@ export default function ProcessFlowSection() {
                           <Video size={20} />
                           Record Your Video
                         </motion.button>
-                        <p className="text-white text-sm mb-3">OR</p>
                       </div>
                     )}
 
+                    {/* Script Section - COMES AFTER RECORD BUTTON */}
+                    <div className="bg-[#2a2a2a] border border-[#C89356] rounded-lg p-6">
+                      <label className="block text-sm font-semibold text-white mb-3">
+                        Please record yourself following this script:
+                      </label>
+                      <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#92400E]">
+                        <p className="text-white whitespace-pre-line leading-relaxed text-base">
+                          {RECORDING_SCRIPT}
+                        </p>
+                      </div>
+                      <p className="mt-3 text-sm text-white">
+                        Record in a quiet room. Keep camera at eye level. Speak
+                        clearly and naturally.
+                      </p>
+                    </div>
+
+                    <p className="text-white text-sm mb-3 text-center">OR</p>
                     {/* Show either VideoRecorder or Upload Zone */}
                     {recordingMode ? (
                       <VideoRecorder
@@ -2091,21 +2004,6 @@ export default function ProcessFlowSection() {
                           )}
                         </motion.button>
                       )}
-
-                    <div className="bg-[#2a2a2a] border border-[#C89356] rounded-lg p-6">
-                      <label className="block text-sm font-semibold text-white mb-3">
-                        Please record yourself following this script:
-                      </label>
-                      <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#92400E]">
-                        <p className="text-white whitespace-pre-line leading-relaxed text-base">
-                          {RECORDING_SCRIPT}
-                        </p>
-                      </div>
-                      <p className="mt-3 text-sm text-white">
-                        Record in a quiet room. Keep camera at eye level. Speak
-                        clearly and naturally.
-                      </p>
-                    </div>
                   </div>
                 </motion.div>
               )}

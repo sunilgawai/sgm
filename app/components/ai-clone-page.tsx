@@ -753,21 +753,6 @@ export default function AiClonePage() {
                             ? "Processing..."
                             : "Get Your AI Clone At $37"}
                         </span>
-                        {!isCheckoutLoading && (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                          >
-                            <path
-                              d="M5 12h14M13 5l6 7-6 7"
-                              stroke="#111827"
-                              strokeWidth="2"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </svg>
-                        )}
                       </button>
                     )}
                   </div>
