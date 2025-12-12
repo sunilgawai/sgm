@@ -463,8 +463,9 @@ export default function VideoRecorder({
       {/* Modal Backdrop - Only visible on desktop, clicking it closes the modal */}
       {!isMobile && (
         <div
-          className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[9998]"
+          className="fixed inset-0 w-screen h-screen bg-black/90 backdrop-blur-sm z-[9998]"
           onClick={onCancel}
+          style={{ minHeight: "100vh", minWidth: "100vw" }}
         />
       )}
 
@@ -549,7 +550,7 @@ export default function VideoRecorder({
 
             {/* Recording Indicator */}
             {isRecording && (
-              <div className="absolute top-4 left-4 flex items-center gap-2 bg-red-600/90 backdrop-blur-md text-white px-4 py-2 rounded-full z-30">
+              <div className="absolute top-4 left-4 flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full z-30">
                 <motion.div
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
