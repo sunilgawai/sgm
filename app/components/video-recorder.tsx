@@ -19,7 +19,10 @@ import { fetchFile, toBlobURL } from "@ffmpeg/util";
 interface VideoRecorderProps {
   onRecordingComplete: (file: File) => void;
   onCancel: () => void;
-  uploadAndProceed?: (file: File) => Promise<string>;
+  uploadAndProceed?: (
+    file: File,
+    onProgress?: (progress: number) => void
+  ) => Promise<string>;
   onProceed?: (submissionId: string) => void;
   script?: string;
   shouldRequestFullscreen?: boolean; // Add this prop
@@ -569,8 +572,13 @@ export default function VideoRecorder({
       setUploading(true);
       setUploadError(null);
       setUploadSuccess(false);
+      setUploadProgress(0);
+
       try {
-        const submissionId = await uploadAndProceed(file);
+        const submissionId = await uploadAndProceed(file, (progress) => {
+          setUploadProgress(progress);
+        });
+        setUploadProgress(100);
         setUploadSuccess(true);
         setTimeout(() => {
           onProceed(submissionId);

@@ -80,56 +80,555 @@ const updateSession = (updates: Partial<SessionData>) => {
   }
 };
 
-async function uploadToCloudinaryChunked(
+// ============ NEW ROBUST UPLOAD SYSTEM ============
+
+interface UploadProgress {
+  phase: "preparing" | "uploading" | "finalizing";
+  progress: number;
+  chunkIndex?: number;
+  totalChunks?: number;
+  bytesUploaded?: number;
+  totalBytes?: number;
+}
+
+interface ChunkUploadState {
+  uploadId: string;
+  uploadedChunks: number[];
+  etags: { partNumber: number; etag: string }[];
+}
+
+const CHUNK_SIZE = 6 * 1024 * 1024; // 6MB chunks (Cloudinary recommends 5-6MB)
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second base delay
+
+// Storage key for resumable uploads
+const getUploadStateKey = (fileHash: string, submissionId: string) =>
+  `upload_state_${submissionId}_${fileHash}`;
+
+// Generate a simple hash for the file (for resume identification)
+const generateFileHash = async (file: File): Promise<string> => {
+  const slice = file.slice(0, 1024 * 1024); // First 1MB
+  const buffer = await slice.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `${hashHex.substring(0, 16)}_${file.size}_${file.name}`;
+};
+
+// Save upload state for resume capability
+const saveUploadState = (key: string, state: ChunkUploadState) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(state));
+  } catch (e) {
+    console.warn("Failed to save upload state:", e);
+  }
+};
+
+// Load upload state for resume
+const loadUploadState = (key: string): ChunkUploadState | null => {
+  try {
+    const data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : null;
+  } catch (e) {
+    return null;
+  }
+};
+
+// Clear upload state
+const clearUploadState = (key: string) => {
+  try {
+    localStorage.removeItem(key);
+  } catch (e) {
+    console.warn("Failed to clear upload state:", e);
+  }
+};
+
+// Sleep utility for retry delays
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Upload a single chunk with retry logic
+async function uploadChunkWithRetry(
+  chunk: Blob,
+  chunkIndex: number,
+  totalChunks: number,
+  fileSize: number,
+  uniqueUploadId: string,
+  uploadParams: {
+    cloudName: string;
+    apiKey: string;
+    timestamp: number;
+    signature: string;
+    folder: string;
+    publicId: string;
+  },
+  retries = MAX_RETRIES
+): Promise<{ etag?: string; result?: any }> {
+  const start = chunkIndex * CHUNK_SIZE;
+  const end = Math.min(start + chunk.size, fileSize);
+  const isLastChunk = chunkIndex === totalChunks - 1;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const result = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+
+        const formData = new FormData();
+        formData.append("file", chunk);
+        formData.append("api_key", uploadParams.apiKey);
+        formData.append("timestamp", uploadParams.timestamp.toString());
+        formData.append("signature", uploadParams.signature);
+        formData.append("folder", uploadParams.folder);
+        formData.append("public_id", uploadParams.publicId);
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              resolve(response);
+            } catch {
+              resolve({ success: true, intermediate: true });
+            }
+          } else {
+            let errorMsg = `HTTP ${xhr.status}`;
+            try {
+              const errorResponse = JSON.parse(xhr.responseText);
+              errorMsg = errorResponse.error?.message || errorMsg;
+            } catch {
+              errorMsg = xhr.responseText || errorMsg;
+            }
+            reject(new Error(errorMsg));
+          }
+        });
+
+        xhr.addEventListener("error", () => reject(new Error("Network error")));
+        xhr.addEventListener("abort", () =>
+          reject(new Error("Upload aborted"))
+        );
+
+        xhr.open(
+          "POST",
+          `https://api.cloudinary.com/v1_1/${uploadParams.cloudName}/video/upload`
+        );
+        xhr.setRequestHeader("X-Unique-Upload-Id", uniqueUploadId);
+        xhr.setRequestHeader(
+          "Content-Range",
+          `bytes ${start}-${end - 1}/${fileSize}`
+        );
+        xhr.send(formData);
+      });
+
+      if (isLastChunk && result.secure_url) {
+        return { result };
+      }
+      return { etag: `chunk_${chunkIndex}` };
+    } catch (error: any) {
+      console.warn(
+        `Chunk ${chunkIndex + 1} attempt ${attempt + 1} failed:`,
+        error.message
+      );
+      if (attempt === retries) {
+        throw new Error(`Chunk ${chunkIndex + 1} failed: ${error.message}`);
+      }
+      await sleep(RETRY_DELAY * Math.pow(2, attempt));
+    }
+  }
+  throw new Error("Unexpected error in chunk upload");
+}
+
+// Main chunked upload function with fault tolerance
+// async function uploadToCloudinaryChunkedRobust(
+//   file: File,
+//   uploadParams: {
+//     cloudName: string;
+//     apiKey: string;
+//     timestamp: number;
+//     signature: string;
+//     folder: string;
+//     publicId: string;
+//   },
+//   submissionId: string,
+//   onProgress?: (progress: UploadProgress) => void
+// ): Promise<any> {
+//   const fileHash = await generateFileHash(file);
+//   const stateKey = getUploadStateKey(fileHash, submissionId);
+//   const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+//   // Generate unique upload ID
+//   const uploadId = `${uploadParams.publicId}_${Date.now()}`;
+
+//   // Check for existing upload state (resume capability)
+//   let uploadState = loadUploadState(stateKey);
+//   let startChunk = 0;
+
+//   if (uploadState && uploadState.uploadId) {
+//     console.log(
+//       `Resuming upload from chunk ${
+//         uploadState.uploadedChunks.length + 1
+//       }/${totalChunks}`
+//     );
+//     startChunk = uploadState.uploadedChunks.length;
+//   } else {
+//     uploadState = {
+//       uploadId,
+//       uploadedChunks: [],
+//       etags: [],
+//     };
+//     saveUploadState(stateKey, uploadState);
+//   }
+
+//   onProgress?.({
+//     phase: "uploading",
+//     progress: Math.round((startChunk / totalChunks) * 100),
+//     chunkIndex: startChunk,
+//     totalChunks,
+//     bytesUploaded: startChunk * CHUNK_SIZE,
+//     totalBytes: file.size,
+//   });
+
+//   let finalResult: any = null;
+
+//   // Upload chunks sequentially
+//   for (let chunkIndex = startChunk; chunkIndex < totalChunks; chunkIndex++) {
+//     const start = chunkIndex * CHUNK_SIZE;
+//     const end = Math.min(start + CHUNK_SIZE, file.size);
+//     const chunk = file.slice(start, end);
+
+//     console.log(
+//       `Uploading chunk ${chunkIndex + 1}/${totalChunks} (${(
+//         chunk.size /
+//         1024 /
+//         1024
+//       ).toFixed(2)} MB)`
+//     );
+
+//     const { etag, result } = await uploadChunkWithRetry(
+//       chunk,
+//       chunkIndex,
+//       totalChunks,
+//       file.size,
+//       uploadState.uploadId,
+//       { ...uploadParams, uploadId: uploadState.uploadId }
+//     );
+
+//     // Update state
+//     uploadState.uploadedChunks.push(chunkIndex);
+//     if (etag) {
+//       uploadState.etags.push({ partNumber: chunkIndex + 1, etag });
+//     }
+//     saveUploadState(stateKey, uploadState);
+
+//     // Update progress
+//     const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+//     onProgress?.({
+//       phase: chunkIndex === totalChunks - 1 ? "finalizing" : "uploading",
+//       progress,
+//       chunkIndex: chunkIndex + 1,
+//       totalChunks,
+//       bytesUploaded: end,
+//       totalBytes: file.size,
+//     });
+
+//     if (result) {
+//       finalResult = result;
+//     }
+//   }
+
+//   // Clear upload state on success
+//   clearUploadState(stateKey);
+
+//   if (!finalResult) {
+//     throw new Error("Upload completed but no result received");
+//   }
+
+//   return finalResult;
+// }
+
+async function uploadToCloudinaryChunkedRobust(
   file: File,
-  uploadParams: any,
-  onProgress?: (progress: number) => void
+  uploadParams: {
+    cloudName: string;
+    apiKey: string;
+    timestamp: number;
+    signature: string;
+    folder: string;
+    publicId: string;
+  },
+  submissionId: string,
+  onProgress?: (progress: UploadProgress) => void
 ): Promise<any> {
-  const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+  const fileHash = await generateFileHash(file);
+  const stateKey = getUploadStateKey(fileHash, submissionId);
   const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
 
-  // Upload chunks sequentially
-  for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+  // Generate unique upload ID for Cloudinary
+  const uniqueUploadId = `${uploadParams.publicId}_${Date.now()}_${Math.random()
+    .toString(36)
+    .substring(2, 10)}`;
+
+  let uploadState = loadUploadState(stateKey);
+  let startChunk = 0;
+
+  if (uploadState && uploadState.uploadedChunks.length > 0) {
+    console.log(
+      `Resuming from chunk ${
+        uploadState.uploadedChunks.length + 1
+      }/${totalChunks}`
+    );
+    startChunk = uploadState.uploadedChunks.length;
+  } else {
+    uploadState = { uploadId: uniqueUploadId, uploadedChunks: [], etags: [] };
+    saveUploadState(stateKey, uploadState);
+  }
+
+  onProgress?.({
+    phase: "uploading",
+    progress: Math.round((startChunk / totalChunks) * 100),
+    chunkIndex: startChunk,
+    totalChunks,
+    bytesUploaded: startChunk * CHUNK_SIZE,
+    totalBytes: file.size,
+  });
+
+  let finalResult: any = null;
+
+  for (let chunkIndex = startChunk; chunkIndex < totalChunks; chunkIndex++) {
     const start = chunkIndex * CHUNK_SIZE;
     const end = Math.min(start + CHUNK_SIZE, file.size);
     const chunk = file.slice(start, end);
 
-    const formData = new FormData();
-    formData.append("file", chunk);
-    formData.append("cloud_name", uploadParams.cloudName);
-    formData.append("timestamp", uploadParams.timestamp.toString());
-    formData.append("signature", uploadParams.signature);
-    formData.append("api_key", uploadParams.apiKey);
-    formData.append("folder", uploadParams.folder);
-    formData.append("public_id", uploadParams.publicId);
-    formData.append("resource_type", "video");
-
-    const response = await fetch(
-      `https://api.cloudinary.com/v1_1/${uploadParams.cloudName}/video/upload`,
-      {
-        method: "POST",
-        body: formData,
-      }
+    console.log(
+      `Uploading chunk ${chunkIndex + 1}/${totalChunks} (${(
+        chunk.size /
+        1024 /
+        1024
+      ).toFixed(2)} MB)`
     );
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.error?.message || `Chunk upload failed: ${response.status}`
-      );
-    }
+    const { etag, result } = await uploadChunkWithRetry(
+      chunk,
+      chunkIndex,
+      totalChunks,
+      file.size,
+      uploadState.uploadId,
+      uploadParams
+    );
+
+    uploadState.uploadedChunks.push(chunkIndex);
+    if (etag) uploadState.etags.push({ partNumber: chunkIndex + 1, etag });
+    saveUploadState(stateKey, uploadState);
 
     const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
-    if (onProgress) {
-      onProgress(progress);
+    onProgress?.({
+      phase: chunkIndex === totalChunks - 1 ? "finalizing" : "uploading",
+      progress,
+      chunkIndex: chunkIndex + 1,
+      totalChunks,
+      bytesUploaded: end,
+      totalBytes: file.size,
+    });
+
+    if (result) finalResult = result;
+  }
+
+  clearUploadState(stateKey);
+
+  if (!finalResult) {
+    throw new Error("Upload completed but no result received");
+  }
+
+  return finalResult;
+}
+// Wrapper function that handles both small and large files
+async function uploadVideoRobust(
+  file: File,
+  submissionId: string,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<{ success: boolean; video?: any; error?: string }> {
+  const DIRECT_UPLOAD_THRESHOLD = 20 * 1024 * 1024; // 20MB
+
+  onProgress?.({ phase: "preparing", progress: 0 });
+
+  try {
+    // For small files, upload directly through server using XHR
+    if (file.size <= DIRECT_UPLOAD_THRESHOLD) {
+      console.log(
+        `Direct upload: ${file.name} (${(file.size / 1024 / 1024).toFixed(
+          2
+        )} MB)`
+      );
+
+      return new Promise((resolve) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("submissionId", submissionId);
+
+        const xhr = new XMLHttpRequest();
+
+        xhr.upload.addEventListener("progress", (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 95);
+            onProgress?.({
+              phase: "uploading",
+              progress,
+              bytesUploaded: event.loaded,
+              totalBytes: event.total,
+            });
+          }
+        });
+
+        xhr.addEventListener("load", () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              const response = JSON.parse(xhr.responseText);
+              if (response.success) {
+                onProgress?.({ phase: "finalizing", progress: 100 });
+                resolve({ success: true, video: response.video });
+              } else if (response.useChunkedUpload) {
+                // Server says use chunked - handle in catch block
+                handleChunkedUpload(
+                  file,
+                  submissionId,
+                  response.uploadParams,
+                  onProgress
+                )
+                  .then(resolve)
+                  .catch((err) =>
+                    resolve({ success: false, error: err.message })
+                  );
+              } else {
+                resolve({
+                  success: false,
+                  error: response.error || "Upload failed",
+                });
+              }
+            } catch {
+              resolve({ success: false, error: "Invalid server response" });
+            }
+          } else {
+            try {
+              const errorResponse = JSON.parse(xhr.responseText);
+              resolve({
+                success: false,
+                error: errorResponse.error || `HTTP ${xhr.status}`,
+              });
+            } catch {
+              resolve({
+                success: false,
+                error: `Upload failed: ${xhr.status}`,
+              });
+            }
+          }
+        });
+
+        xhr.addEventListener("error", () =>
+          resolve({ success: false, error: "Network error" })
+        );
+        xhr.addEventListener("abort", () =>
+          resolve({ success: false, error: "Upload cancelled" })
+        );
+
+        xhr.open("POST", "/api/v1/uploads/upload-video");
+        xhr.send(formData);
+      });
     }
 
-    // Only the last chunk returns the full result
-    if (chunkIndex === totalChunks - 1) {
-      return await response.json();
+    // For large files, get upload params and use chunked upload
+    console.log(
+      `Chunked upload: ${file.name} (${(file.size / 1024 / 1024).toFixed(
+        2
+      )} MB)`
+    );
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("submissionId", submissionId);
+
+    const initResponse = await fetch("/api/v1/uploads/upload-video", {
+      method: "POST",
+      body: formData,
+    });
+
+    const initData = await initResponse.json();
+
+    if (initData.success) {
+      onProgress?.({ phase: "finalizing", progress: 100 });
+      return { success: true, video: initData.video };
     }
+
+    if (!initData.useChunkedUpload || !initData.uploadParams) {
+      return {
+        success: false,
+        error: "Server did not provide chunked upload params",
+      };
+    }
+
+    return handleChunkedUpload(
+      file,
+      submissionId,
+      initData.uploadParams,
+      onProgress
+    );
+  } catch (error: any) {
+    console.error("Upload error:", error);
+    return { success: false, error: error.message };
   }
 }
+
+// Handle chunked upload with finalization
+async function handleChunkedUpload(
+  file: File,
+  submissionId: string,
+  uploadParams: any,
+  onProgress?: (progress: UploadProgress) => void
+): Promise<{ success: boolean; video?: any; error?: string }> {
+  try {
+    // Perform chunked upload to Cloudinary
+    const cloudinaryResult = await uploadToCloudinaryChunkedRobust(
+      file,
+      uploadParams,
+      submissionId,
+      onProgress
+    );
+
+    onProgress?.({ phase: "finalizing", progress: 98 });
+
+    // Finalize upload on server
+    const finalizeResponse = await fetch("/api/v1/uploads/finalize-upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        submissionId,
+        uploadResult: cloudinaryResult,
+        filename: file.name,
+        fileSize: file.size,
+      }),
+    });
+
+    if (!finalizeResponse.ok) {
+      console.warn("Finalization failed, but upload succeeded to Cloudinary");
+    }
+
+    const finalizeData = await finalizeResponse.json().catch(() => ({}));
+    onProgress?.({ phase: "finalizing", progress: 100 });
+
+    return {
+      success: true,
+      video: finalizeData.video || {
+        url: cloudinaryResult.secure_url,
+        publicId: cloudinaryResult.public_id,
+        filename: file.name,
+        size: file.size,
+      },
+    };
+  } catch (error: any) {
+    console.error("Chunked upload error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// ============ END NEW UPLOAD SYSTEM ============
 
 export default function ProcessFlowSection() {
   const [currentStep, setCurrentStep] = useState(1);
@@ -394,7 +893,10 @@ export default function ProcessFlowSection() {
 
   // New: uploadAndProceed for in-modal upload after recording
   const uploadAndProceed = useCallback(
-    async (file: File): Promise<string> => {
+    async (
+      file: File,
+      onProgress?: (progress: number) => void
+    ): Promise<string> => {
       if (!orderId) {
         throw new Error("Order not found. Please complete payment first.");
       }
@@ -404,7 +906,6 @@ export default function ProcessFlowSection() {
       setUploadProgress(0);
 
       try {
-        // Create submission if it doesn't exist
         let currentSubmissionId = submissionId;
         if (!currentSubmissionId) {
           const buyerEmail = buyerInfo?.email || "customer@example.com";
@@ -429,6 +930,7 @@ export default function ProcessFlowSection() {
           const submissionData = await submissionResponse.json();
           if (submissionData.submissionId) {
             currentSubmissionId = submissionData.submissionId;
+            setSubmissionId(currentSubmissionId);
           } else {
             throw new Error(
               submissionData.error || "Failed to create submission"
@@ -437,72 +939,27 @@ export default function ProcessFlowSection() {
         }
 
         console.log(
-          `Uploading recorded file: ${file.name} (${(
-            file.size /
-            1024 /
-            1024
-          ).toFixed(2)} MB)`
+          `Uploading: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`
         );
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("submissionId", currentSubmissionId);
-
-        const uploadResponse = await fetch("/api/v1/uploads/upload-video", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadResponse.ok) {
-          const errorData = await uploadResponse
-            .json()
-            .catch(() => ({ error: "Upload failed" }));
-          throw new Error(
-            errorData.error || `Upload failed: ${uploadResponse.status}`
-          );
-        }
-
-        const uploadData = await uploadResponse.json();
-
-        // Check if we need to use chunked upload
-        if (uploadData.useChunkedUpload) {
-          console.log(`Using chunked upload for large file: ${file.name}`);
-
-          // Perform chunked upload directly to Cloudinary
-          const cloudinaryResult = await uploadToCloudinaryChunked(
-            file,
-            uploadData.uploadParams,
-            (progress) => {
-              setUploadProgress(progress);
-              console.log(`Upload progress: ${progress}%`);
-            }
-          );
-
-          // Finalize the upload on our server
-          const finalizeResponse = await fetch(
-            "/api/v1/uploads/finalize-upload",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                submissionId: currentSubmissionId,
-                uploadResult: cloudinaryResult,
-                filename: file.name,
-                fileSize: file.size,
-              }),
-            }
-          );
-
-          if (!finalizeResponse.ok) {
-            throw new Error("Failed to finalize chunked upload");
+        const uploadResult = await uploadVideoRobust(
+          file,
+          currentSubmissionId!,
+          (progress) => {
+            setUploadProgress(progress.progress);
+            // Call the callback to update VideoRecorder's progress
+            onProgress?.(progress.progress);
+            console.log(`Upload: ${progress.phase} - ${progress.progress}%`);
           }
+        );
 
-          console.log(`✓ Successfully uploaded (chunked): ${file.name}`);
-        } else {
-          console.log(`✓ Successfully uploaded: ${file.name}`);
+        if (!uploadResult.success) {
+          throw new Error(uploadResult.error || "Upload failed");
         }
 
+        console.log(`✓ Uploaded: ${file.name}`);
         setUploadProgress(100);
+        onProgress?.(100);
         return currentSubmissionId || "";
       } catch (err: any) {
         console.error("Upload error:", err);
@@ -621,79 +1078,45 @@ export default function ProcessFlowSection() {
 
       console.log(`Starting upload of ${files.length} file(s)...`);
 
-      // Upload each file
-      for (const file of files) {
+      // Upload each file using robust upload
+      for (let fileIndex = 0; fileIndex < files.length; fileIndex++) {
+        const file = files[fileIndex];
         try {
           console.log(
-            `Uploading file: ${file.name} (${(file.size / 1024 / 1024).toFixed(
-              2
-            )} MB)`
+            `Uploading file ${fileIndex + 1}/${files.length}: ${file.name} (${(
+              file.size /
+              1024 /
+              1024
+            ).toFixed(2)} MB)`
           );
 
-          const formData = new FormData();
-          formData.append("file", file);
-          if (currentSubmissionId) {
-            formData.append("submissionId", currentSubmissionId);
-          }
+          const uploadResult = await uploadVideoRobust(
+            file,
+            currentSubmissionId!,
+            (progress) => {
+              // Calculate progress across all files
+              const fileProgress = progress.progress;
+              const overallProgress = Math.round(
+                (fileIndex * 100 + fileProgress) / files.length
+              );
+              setUploadProgress(overallProgress);
 
-          // First, check if we need chunked upload
-          const uploadResponse = await fetch("/api/v1/uploads/upload-video", {
-            method: "POST",
-            body: formData,
-          });
-
-          if (!uploadResponse.ok) {
-            const errorData = await uploadResponse
-              .json()
-              .catch(() => ({ error: "Upload failed" }));
-            console.error(`Upload failed for ${file.name}:`, errorData);
-            throw new Error(
-              errorData.error || `Upload failed: ${uploadResponse.status}`
-            );
-          }
-
-          const uploadData = await uploadResponse.json();
-
-          // Check if we need to use chunked upload
-          if (uploadData.useChunkedUpload) {
-            console.log(`Using chunked upload for large file: ${file.name}`);
-
-            // Perform chunked upload directly to Cloudinary
-            const cloudinaryResult = await uploadToCloudinaryChunked(
-              file,
-              uploadData.uploadParams,
-              (progress) => {
-                setUploadProgress(progress);
-                console.log(`Upload progress: ${progress}%`);
+              if (progress.chunkIndex && progress.totalChunks) {
+                console.log(
+                  `File ${fileIndex + 1}/${files.length} - Chunk ${
+                    progress.chunkIndex
+                  }/${progress.totalChunks} (${progress.phase})`
+                );
               }
-            );
-
-            // Finalize the upload on our server
-            const finalizeResponse = await fetch(
-              "/api/v1/uploads/finalize-upload",
-              {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  submissionId: currentSubmissionId,
-                  uploadResult: cloudinaryResult,
-                  filename: file.name,
-                  fileSize: file.size,
-                }),
-              }
-            );
-
-            if (!finalizeResponse.ok) {
-              throw new Error("Failed to finalize chunked upload");
             }
+          );
 
-            console.log(`✓ Successfully uploaded (chunked): ${file.name}`);
-          } else {
-            console.log(`✓ Successfully uploaded: ${file.name}`);
+          if (!uploadResult.success) {
+            throw new Error(uploadResult.error || "Upload failed");
           }
 
+          console.log(`✓ Successfully uploaded: ${file.name}`);
           successfulUploads.push(file.name);
-          setUploadProgress(100);
         } catch (fileError: any) {
           console.error(`Error uploading ${file.name}:`, fileError);
           uploadErrors.push(`${file.name}: ${fileError.message}`);
@@ -714,6 +1137,7 @@ export default function ProcessFlowSection() {
 
       setUploadedFiles((prev) => [...prev, ...successfulUploads]);
       setFiles([]);
+      setUploadProgress(100);
 
       setCompletedSteps((prev) => {
         if (!prev.includes(2)) {
@@ -2466,3 +2890,4 @@ export default function ProcessFlowSection() {
     </>
   );
 }
+
