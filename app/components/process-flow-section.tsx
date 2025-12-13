@@ -16,7 +16,7 @@ import {
 import VideoRecorder from "./video-recorder";
 
 // const RECORDING_SCRIPT = `Feel free to speak on any topic you prefer, or follow the sample script provided on the next screen.`;
-const RECORDING_SCRIPT = `Hello, I am excited to record this video. I'm speaking with confidence and ease. The lighting looks great and my voice is clear. I'm keeping a warm smile with natural hand movements. My face stays well visible as I speak steadily. I'm taking gentle pauses between sentences.`;
+const RECORDING_SCRIPT = `Feel free to speak any topic you prefer, or follow the same script provided on the next screen`;
 
 // Hi! I’m feeling good today. The lighting is nice and I’m speaking clearly. I’m relaxed and smiling while recording. I’ll talk naturally and move my hands a bit as I speak.`;
 
