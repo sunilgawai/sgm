@@ -1563,7 +1563,10 @@ export default function ProcessFlowSection() {
                               </label>
                               <div className="bg-[#1a1a1a] rounded-lg p-3 border border-[#92400E]">
                                 <p className="text-white whitespace-pre-line leading-relaxed text-sm">
-                                  {RECORDING_SCRIPT}
+                                  Hi! I’m feeling good today. The lighting is
+                                  nice and I’m speaking clearly. I’m relaxed and
+                                  smiling while recording. I’ll talk naturally
+                                  and move my hands a bit as I speak.
                                 </p>
                               </div>
                               <p className="mt-2 text-xs text-white">
@@ -2103,7 +2106,10 @@ export default function ProcessFlowSection() {
                       </label>
                       <div className="bg-[#1a1a1a] rounded-lg p-4 border border-[#92400E]">
                         <p className="text-white whitespace-pre-line leading-relaxed text-base">
-                          {RECORDING_SCRIPT}
+                          Hi! I’m feeling good today. The lighting is nice and
+                          I’m speaking clearly. I’m relaxed and smiling while
+                          recording. I’ll talk naturally and move my hands a bit
+                          as I speak.
                         </p>
                       </div>
                       <p className="mt-3 text-sm text-white">
