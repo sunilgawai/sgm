@@ -65,7 +65,7 @@ export default function Footer() {
               </div>
               <div className="text-sm">
                 <p className="text-gray-400">Parent Company</p>
-                <p className="text-white font-medium">Next Mobi Fz Llc</p>
+                <p className="text-white font-medium">NEXT MOBI FZ LLC</p>
               </div>
             </div>
           </div>
