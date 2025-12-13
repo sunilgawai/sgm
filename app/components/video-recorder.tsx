@@ -742,13 +742,13 @@ export default function VideoRecorder({
 
             {/* Recording Indicator */}
             {isRecording && (
-              <div className="absolute top-4 left-4 flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full z-30">
+              <div className="absolute top-2 left-4 flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full z-30">
                 <motion.div
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                   className="w-3 h-3 bg-white rounded-full"
                 />
-                <span className="font-bold text-lg">
+                <span className="font-bold text-md">
                   {formatTime(recordingTime)}
                 </span>
               </div>

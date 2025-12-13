@@ -149,6 +149,94 @@ const clearUploadState = (key: string) => {
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Upload a single chunk with retry logic
+// async function uploadChunkWithRetry(
+//   chunk: Blob,
+//   chunkIndex: number,
+//   totalChunks: number,
+//   fileSize: number,
+//   uniqueUploadId: string,
+//   uploadParams: {
+//     cloudName: string;
+//     apiKey: string;
+//     timestamp: number;
+//     signature: string;
+//     folder: string;
+//     publicId: string;
+//   },
+//   retries = MAX_RETRIES
+// ): Promise<{ etag?: string; result?: any }> {
+//   const start = chunkIndex * CHUNK_SIZE;
+//   const end = Math.min(start + chunk.size, fileSize);
+//   const isLastChunk = chunkIndex === totalChunks - 1;
+
+//   for (let attempt = 0; attempt <= retries; attempt++) {
+//     try {
+//       const result = await new Promise<any>((resolve, reject) => {
+//         const xhr = new XMLHttpRequest();
+
+//         const formData = new FormData();
+//         formData.append("file", chunk);
+//         formData.append("api_key", uploadParams.apiKey);
+//         formData.append("timestamp", uploadParams.timestamp.toString());
+//         formData.append("signature", uploadParams.signature);
+//         formData.append("folder", uploadParams.folder);
+//         formData.append("public_id", uploadParams.publicId);
+
+//         xhr.addEventListener("load", () => {
+//           if (xhr.status >= 200 && xhr.status < 300) {
+//             try {
+//               const response = JSON.parse(xhr.responseText);
+//               resolve(response);
+//             } catch {
+//               resolve({ success: true, intermediate: true });
+//             }
+//           } else {
+//             let errorMsg = `HTTP ${xhr.status}`;
+//             try {
+//               const errorResponse = JSON.parse(xhr.responseText);
+//               errorMsg = errorResponse.error?.message || errorMsg;
+//             } catch {
+//               errorMsg = xhr.responseText || errorMsg;
+//             }
+//             reject(new Error(errorMsg));
+//           }
+//         });
+
+//         xhr.addEventListener("error", () => reject(new Error("Network error")));
+//         xhr.addEventListener("abort", () =>
+//           reject(new Error("Upload aborted"))
+//         );
+
+//         xhr.open(
+//           "POST",
+//           `https://api.cloudinary.com/v1_1/${uploadParams.cloudName}/video/upload`
+//         );
+//         xhr.setRequestHeader("X-Unique-Upload-Id", uniqueUploadId);
+//         xhr.setRequestHeader(
+//           "Content-Range",
+//           `bytes ${start}-${end - 1}/${fileSize}`
+//         );
+//         xhr.send(formData);
+//       });
+
+//       if (isLastChunk && result.secure_url) {
+//         return { result };
+//       }
+//       return { etag: `chunk_${chunkIndex}` };
+//     } catch (error: any) {
+//       console.warn(
+//         `Chunk ${chunkIndex + 1} attempt ${attempt + 1} failed:`,
+//         error.message
+//       );
+//       if (attempt === retries) {
+//         throw new Error(`Chunk ${chunkIndex + 1} failed: ${error.message}`);
+//       }
+//       await sleep(RETRY_DELAY * Math.pow(2, attempt));
+//     }
+//   }
+//   throw new Error("Unexpected error in chunk upload");
+// }
+
 async function uploadChunkWithRetry(
   chunk: Blob,
   chunkIndex: number,
@@ -167,7 +255,6 @@ async function uploadChunkWithRetry(
 ): Promise<{ etag?: string; result?: any }> {
   const start = chunkIndex * CHUNK_SIZE;
   const end = Math.min(start + chunk.size, fileSize);
-  const isLastChunk = chunkIndex === totalChunks - 1;
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -219,9 +306,26 @@ async function uploadChunkWithRetry(
         xhr.send(formData);
       });
 
-      if (isLastChunk && result.secure_url) {
-        return { result };
+      // Log response for debugging
+      console.log(`Chunk ${chunkIndex + 1}/${totalChunks} response:`, {
+        hasSecureUrl: !!result.secure_url,
+        hasPublicId: !!result.public_id,
+        isDone: result.done,
+        responseKeys: Object.keys(result),
+        fullResponse: result,
+      });
+
+      // Check if this response contains the final result
+      // Cloudinary returns secure_url when ALL chunks are received,
+      // which could be on ANY chunk request that completes last
+      if (result.secure_url || result.done === true) {
+        console.log(
+          `✓ Chunk ${chunkIndex + 1} has final result with secure_url`
+        );
+        return { result, etag: `chunk_${chunkIndex}` };
       }
+
+      // Intermediate chunk response - no final result yet
       return { etag: `chunk_${chunkIndex}` };
     } catch (error: any) {
       console.warn(
@@ -236,114 +340,43 @@ async function uploadChunkWithRetry(
   }
   throw new Error("Unexpected error in chunk upload");
 }
+// Concurrent upload controller with limit
+async function uploadChunksConcurrently(
+  chunks: { index: number; blob: Blob }[],
+  concurrencyLimit: number,
+  uploadFn: (chunk: { index: number; blob: Blob }) => Promise<any>,
+  onProgress: (completed: number, total: number) => void
+): Promise<any[]> {
+  const results: any[] = new Array(chunks.length);
+  let completed = 0;
+  let currentIndex = 0;
 
-// Main chunked upload function with fault tolerance
-// async function uploadToCloudinaryChunkedRobust(
-//   file: File,
-//   uploadParams: {
-//     cloudName: string;
-//     apiKey: string;
-//     timestamp: number;
-//     signature: string;
-//     folder: string;
-//     publicId: string;
-//   },
-//   submissionId: string,
-//   onProgress?: (progress: UploadProgress) => void
-// ): Promise<any> {
-//   const fileHash = await generateFileHash(file);
-//   const stateKey = getUploadStateKey(fileHash, submissionId);
-//   const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+  const uploadNext = async (): Promise<void> => {
+    if (currentIndex >= chunks.length) return;
 
-//   // Generate unique upload ID
-//   const uploadId = `${uploadParams.publicId}_${Date.now()}`;
+    const chunkToUpload = chunks[currentIndex++];
+    try {
+      results[chunkToUpload.index] = await uploadFn(chunkToUpload);
+      completed++;
+      onProgress(completed, chunks.length);
+    } catch (error) {
+      throw error;
+    }
 
-//   // Check for existing upload state (resume capability)
-//   let uploadState = loadUploadState(stateKey);
-//   let startChunk = 0;
+    // Continue with next chunk
+    if (currentIndex < chunks.length) {
+      await uploadNext();
+    }
+  };
 
-//   if (uploadState && uploadState.uploadId) {
-//     console.log(
-//       `Resuming upload from chunk ${
-//         uploadState.uploadedChunks.length + 1
-//       }/${totalChunks}`
-//     );
-//     startChunk = uploadState.uploadedChunks.length;
-//   } else {
-//     uploadState = {
-//       uploadId,
-//       uploadedChunks: [],
-//       etags: [],
-//     };
-//     saveUploadState(stateKey, uploadState);
-//   }
+  // Start concurrent uploads (limited by concurrencyLimit)
+  const workers = Array.from({ length: Math.min(concurrencyLimit, chunks.length) }, () =>
+    uploadNext()
+  );
 
-//   onProgress?.({
-//     phase: "uploading",
-//     progress: Math.round((startChunk / totalChunks) * 100),
-//     chunkIndex: startChunk,
-//     totalChunks,
-//     bytesUploaded: startChunk * CHUNK_SIZE,
-//     totalBytes: file.size,
-//   });
-
-//   let finalResult: any = null;
-
-//   // Upload chunks sequentially
-//   for (let chunkIndex = startChunk; chunkIndex < totalChunks; chunkIndex++) {
-//     const start = chunkIndex * CHUNK_SIZE;
-//     const end = Math.min(start + CHUNK_SIZE, file.size);
-//     const chunk = file.slice(start, end);
-
-//     console.log(
-//       `Uploading chunk ${chunkIndex + 1}/${totalChunks} (${(
-//         chunk.size /
-//         1024 /
-//         1024
-//       ).toFixed(2)} MB)`
-//     );
-
-//     const { etag, result } = await uploadChunkWithRetry(
-//       chunk,
-//       chunkIndex,
-//       totalChunks,
-//       file.size,
-//       uploadState.uploadId,
-//       { ...uploadParams, uploadId: uploadState.uploadId }
-//     );
-
-//     // Update state
-//     uploadState.uploadedChunks.push(chunkIndex);
-//     if (etag) {
-//       uploadState.etags.push({ partNumber: chunkIndex + 1, etag });
-//     }
-//     saveUploadState(stateKey, uploadState);
-
-//     // Update progress
-//     const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
-//     onProgress?.({
-//       phase: chunkIndex === totalChunks - 1 ? "finalizing" : "uploading",
-//       progress,
-//       chunkIndex: chunkIndex + 1,
-//       totalChunks,
-//       bytesUploaded: end,
-//       totalBytes: file.size,
-//     });
-
-//     if (result) {
-//       finalResult = result;
-//     }
-//   }
-
-//   // Clear upload state on success
-//   clearUploadState(stateKey);
-
-//   if (!finalResult) {
-//     throw new Error("Upload completed but no result received");
-//   }
-
-//   return finalResult;
-// }
+  await Promise.all(workers);
+  return results;
+}
 
 async function uploadToCloudinaryChunkedRobust(
   file: File,
@@ -391,55 +424,223 @@ async function uploadToCloudinaryChunkedRobust(
     totalBytes: file.size,
   });
 
-  let finalResult: any = null;
-
-  for (let chunkIndex = startChunk; chunkIndex < totalChunks; chunkIndex++) {
-    const start = chunkIndex * CHUNK_SIZE;
+  // Prepare chunks to upload
+  const chunksToUpload: { index: number; blob: Blob }[] = [];
+  for (let i = startChunk; i < totalChunks; i++) {
+    const start = i * CHUNK_SIZE;
     const end = Math.min(start + CHUNK_SIZE, file.size);
-    const chunk = file.slice(start, end);
+    chunksToUpload.push({
+      index: i,
+      blob: file.slice(start, end),
+    });
+  }
 
-    console.log(
-      `Uploading chunk ${chunkIndex + 1}/${totalChunks} (${(
-        chunk.size /
-        1024 /
-        1024
-      ).toFixed(2)} MB)`
+  console.log(`Starting concurrent upload of ${chunksToUpload.length} chunks`);
+
+  const CONCURRENCY_LIMIT = 5;
+
+  try {
+    // Upload chunks concurrently and collect results
+    const uploadResults = await uploadChunksConcurrently(
+      chunksToUpload,
+      CONCURRENCY_LIMIT,
+      async (chunk) => {
+        const start = chunk.index * CHUNK_SIZE;
+        const end = Math.min(start + chunk.blob.size, file.size);
+
+        console.log(
+          `Uploading chunk ${chunk.index + 1}/${totalChunks} (${(
+            chunk.blob.size /
+            1024 /
+            1024
+          ).toFixed(2)} MB)`
+        );
+
+        const { etag, result } = await uploadChunkWithRetry(
+          chunk.blob,
+          chunk.index,
+          totalChunks,
+          file.size,
+          uploadState.uploadId,
+          uploadParams
+        );
+
+        // Update state after successful upload
+        uploadState.uploadedChunks.push(chunk.index);
+        if (etag) uploadState.etags.push({ partNumber: chunk.index + 1, etag });
+        saveUploadState(stateKey, uploadState);
+
+        return { chunkIndex: chunk.index, etag, result };
+      },
+      (completed, total) => {
+        // Progress callback
+        const progress = Math.round(
+          ((startChunk + completed) / totalChunks) * 100
+        );
+        const bytesUploaded = (startChunk + completed) * CHUNK_SIZE;
+
+        onProgress?.({
+          phase: completed === total ? "finalizing" : "uploading",
+          progress,
+          chunkIndex: startChunk + completed,
+          totalChunks,
+          bytesUploaded: Math.min(bytesUploaded, file.size),
+          totalBytes: file.size,
+        });
+      }
     );
 
-    const { etag, result } = await uploadChunkWithRetry(
-      chunk,
-      chunkIndex,
-      totalChunks,
-      file.size,
-      uploadState.uploadId,
-      uploadParams
-    );
+    // Find the result from the last chunk (highest index)
+    // The last chunk should have the complete Cloudinary response
+    let finalResult: any = null;
 
-    uploadState.uploadedChunks.push(chunkIndex);
-    if (etag) uploadState.etags.push({ partNumber: chunkIndex + 1, etag });
-    saveUploadState(stateKey, uploadState);
+    for (const uploadResult of uploadResults) {
+      if (
+        uploadResult &&
+        uploadResult.result &&
+        uploadResult.result.secure_url
+      ) {
+        finalResult = uploadResult.result;
+        console.log(
+          `✓ Found final result from chunk ${
+            uploadResult.chunkIndex + 1
+          }/${totalChunks}`
+        );
+        break;
+      }
+    }
 
-    const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
-    onProgress?.({
-      phase: chunkIndex === totalChunks - 1 ? "finalizing" : "uploading",
-      progress,
-      chunkIndex: chunkIndex + 1,
-      totalChunks,
-      bytesUploaded: end,
-      totalBytes: file.size,
+    clearUploadState(stateKey);
+
+    if (!finalResult) {
+      console.error(
+        "No secure_url found in any chunk. All results:",
+        uploadResults.map((r, i) => ({
+          chunkIndex: r?.chunkIndex + 1,
+          hasResult: !!r?.result,
+          hasSecureUrl: !!r?.result?.secure_url,
+          responseKeys: r?.result ? Object.keys(r.result) : [],
+          sample: r?.result
+            ? {
+                public_id: r.result.public_id,
+                bytes: r.result.bytes,
+                done: r.result.done,
+              }
+            : null,
+        }))
+      );
+      throw new Error(
+        "Upload completed but no result received from Cloudinary"
+      );
+    }
+
+    console.log("Upload successful:", {
+      url: finalResult.secure_url,
+      publicId: finalResult.public_id,
     });
 
-    if (result) finalResult = result;
+    return finalResult;
+  } catch (error: any) {
+    console.error("Concurrent upload failed:", error);
+    throw error;
   }
-
-  clearUploadState(stateKey);
-
-  if (!finalResult) {
-    throw new Error("Upload completed but no result received");
-  }
-
-  return finalResult;
 }
+
+// async function uploadToCloudinaryChunkedRobust(
+//   file: File,
+//   uploadParams: {
+//     cloudName: string;
+//     apiKey: string;
+//     timestamp: number;
+//     signature: string;
+//     folder: string;
+//     publicId: string;
+//   },
+//   submissionId: string,
+//   onProgress?: (progress: UploadProgress) => void
+// ): Promise<any> {
+//   const fileHash = await generateFileHash(file);
+//   const stateKey = getUploadStateKey(fileHash, submissionId);
+//   const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+
+//   // Generate unique upload ID for Cloudinary
+//   const uniqueUploadId = `${uploadParams.publicId}_${Date.now()}_${Math.random()
+//     .toString(36)
+//     .substring(2, 10)}`;
+
+//   let uploadState = loadUploadState(stateKey);
+//   let startChunk = 0;
+
+//   if (uploadState && uploadState.uploadedChunks.length > 0) {
+//     console.log(
+//       `Resuming from chunk ${
+//         uploadState.uploadedChunks.length + 1
+//       }/${totalChunks}`
+//     );
+//     startChunk = uploadState.uploadedChunks.length;
+//   } else {
+//     uploadState = { uploadId: uniqueUploadId, uploadedChunks: [], etags: [] };
+//     saveUploadState(stateKey, uploadState);
+//   }
+
+//   onProgress?.({
+//     phase: "uploading",
+//     progress: Math.round((startChunk / totalChunks) * 100),
+//     chunkIndex: startChunk,
+//     totalChunks,
+//     bytesUploaded: startChunk * CHUNK_SIZE,
+//     totalBytes: file.size,
+//   });
+
+//   let finalResult: any = null;
+
+//   for (let chunkIndex = startChunk; chunkIndex < totalChunks; chunkIndex++) {
+//     const start = chunkIndex * CHUNK_SIZE;
+//     const end = Math.min(start + CHUNK_SIZE, file.size);
+//     const chunk = file.slice(start, end);
+
+//     console.log(
+//       `Uploading chunk ${chunkIndex + 1}/${totalChunks} (${(
+//         chunk.size /
+//         1024 /
+//         1024
+//       ).toFixed(2)} MB)`
+//     );
+
+//     const { etag, result } = await uploadChunkWithRetry(
+//       chunk,
+//       chunkIndex,
+//       totalChunks,
+//       file.size,
+//       uploadState.uploadId,
+//       uploadParams
+//     );
+
+//     uploadState.uploadedChunks.push(chunkIndex);
+//     if (etag) uploadState.etags.push({ partNumber: chunkIndex + 1, etag });
+//     saveUploadState(stateKey, uploadState);
+
+//     const progress = Math.round(((chunkIndex + 1) / totalChunks) * 100);
+//     onProgress?.({
+//       phase: chunkIndex === totalChunks - 1 ? "finalizing" : "uploading",
+//       progress,
+//       chunkIndex: chunkIndex + 1,
+//       totalChunks,
+//       bytesUploaded: end,
+//       totalBytes: file.size,
+//     });
+
+//     if (result) finalResult = result;
+//   }
+
+//   clearUploadState(stateKey);
+
+//   if (!finalResult) {
+//     throw new Error("Upload completed but no result received");
+//   }
+
+//   return finalResult;
+// }
 // Wrapper function that handles both small and large files
 async function uploadVideoRobust(
   file: File,
