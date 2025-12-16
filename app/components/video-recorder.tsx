@@ -985,8 +985,8 @@ export default function VideoRecorder({
                           <Check size={20} />
                         )}
                         {uploadAndProceed
-                          ? "Upload & Proceed"
-                          : "Submit Recording"}
+                          ? "Upload"
+                          : "Submit"}
                       </>
                     )}
                   </motion.button>
