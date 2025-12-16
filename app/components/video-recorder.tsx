@@ -462,13 +462,13 @@ export default function VideoRecorder({
         "-c:v",
         "libx264",
         "-preset",
-        "ultrafast",
+        "medium",
         "-crf",
-        "23",
+        "18",
         "-c:a",
         "aac",
         "-b:a",
-        "96k", // Lower for speed
+        "128k",
         "-movflags",
         "+faststart",
         "-y",
@@ -482,7 +482,14 @@ export default function VideoRecorder({
         "FFmpeg enhancement failed, falling back to raw blob:",
         enhanceErr
       );
-      // ... cleanup
+      if (ffmpeg) {
+        try {
+          await ffmpeg.deleteFile("input.webm");
+          if (await ffmpeg.exists("output.mp4")) {
+            await ffmpeg.deleteFile("output.mp4");
+          }
+        } catch {}
+      }
       return inputBlob;
     }
   };
