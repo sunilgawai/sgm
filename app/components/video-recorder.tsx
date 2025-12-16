@@ -460,19 +460,23 @@ export default function VideoRecorder({
         "-vf",
         "hqdn3d=4:3:6,deblock=alpha=0.1:beta=0.1,unsharp=5:5:1.0",
         "-c:v",
-        "libvpx-vp9",
+        "libx264",
+        "-preset",
+        "medium",
         "-crf",
         "18",
-        "-b:v",
-        "0",
         "-c:a",
-        "libopus",
+        "aac",
+        "-b:a",
+        "128k",
+        "-movflags",
+        "+faststart",
         "-y",
-        "output.webm",
+        "output.mp4",
       ]);
 
-      const data = await ffmpeg.readFile("output.webm");
-      return new Blob([data.buffer], { type: "video/webm" });
+      const data = await ffmpeg.readFile("output.mp4");
+      return new Blob([data.buffer], { type: "video/mp4" });
     } catch (enhanceErr: any) {
       console.warn(
         "FFmpeg enhancement failed, falling back to raw blob:",
@@ -481,8 +485,8 @@ export default function VideoRecorder({
       if (ffmpeg) {
         try {
           await ffmpeg.deleteFile("input.webm");
-          if (await ffmpeg.exists("output.webm")) {
-            await ffmpeg.deleteFile("output.webm");
+          if (await ffmpeg.exists("output.mp4")) {
+            await ffmpeg.deleteFile("output.mp4");
           }
         } catch {}
       }
@@ -548,9 +552,9 @@ export default function VideoRecorder({
     const timestamp = Date.now();
     const file = new File(
       [recordedBlobRef.current],
-      `recording-${timestamp}.webm`,
+      `recording-${timestamp}.mp4`,
       {
-        type: recordedBlobRef.current.type || "video/webm",
+        type: recordedBlobRef.current.type || "video/mp4",
         lastModified: timestamp,
       }
     );
@@ -789,9 +793,10 @@ export default function VideoRecorder({
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1rem;
+                    font-size: 1.2rem;
                     color: white;
-                    white-space: nowrap;
+                    white-space: pre-wrap; 
+                    word-wrap: break-word; 
                     flex-shrink: 0;
                   }
                   `}</style>
@@ -803,13 +808,16 @@ export default function VideoRecorder({
                         }}
                       >
                         {teleprompterLines.map((line, index) => (
-                          <div key={index} className="line">
+                          <div key={index} className="line text-wrap">
                             {line}
                           </div>
                         ))}
                         {/* Repeat lines at the end to create seamless loop */}
                         {teleprompterLines.map((line, index) => (
-                          <div key={`repeat-${index}`} className="line">
+                          <div
+                            key={`repeat-${index}`}
+                            className="line text-wrap"
+                          >
                             {line}
                           </div>
                         ))}
@@ -836,7 +844,7 @@ export default function VideoRecorder({
             )}
 
             {/* Control Buttons */}
-            <div className="absolute bottom-12 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4 pb-safe">
+            <div className="absolute bottom-20 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4 pb-safe">
               {!isRecording &&
                 countdown === null &&
                 !isProcessing &&
