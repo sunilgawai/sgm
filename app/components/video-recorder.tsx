@@ -444,6 +444,7 @@ export default function VideoRecorder({
 
       await ffmpeg.writeFile("input.webm", await fetchFile(inputBlob));
 
+      // Fast mode command
       await ffmpeg.exec([
         "-fflags",
         "+genpts+igndts",
@@ -458,7 +459,6 @@ export default function VideoRecorder({
         "-af",
         "aresample=async=1",
         "-vf",
-        "hqdn3d=4:3:6,deblock=alpha=0.1:beta=0.1,unsharp=5:5:1.0",
         "-c:v",
         "libx264",
         "-preset",
@@ -907,6 +907,7 @@ export default function VideoRecorder({
               src={recordedVideoUrl}
               controls
               className="w-full h-full object-contain"
+              // controlsList="nodownload noplaybackrate nofullscreen noremoteplayback nopicture-in-picture"
             />
 
             {/* Upload Progress Overlay */}
@@ -949,7 +950,7 @@ export default function VideoRecorder({
             )}
 
             {/* Playback Controls Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-6 z-30 pb-safe">
+            <div className="absolute bottom-12 left-0 right-0 bg-transparent p-6 z-30 pb-safe">
               <div className="max-w-2xl mx-auto">
                 <p className="text-white text-center font-semibold text-lg mb-4">
                   Review Your Recording
@@ -958,13 +959,11 @@ export default function VideoRecorder({
                   <motion.button
                     onClick={handleSubmitRecording}
                     disabled={uploading || uploadSuccess}
-                    className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl disabled:opacity-50"
+                    className="flex items-center gap-2 text-white px-5 py-3 md:px-6 md:py-4 rounded-full font-semibold text-sm md:text-base shadow-2xl disabled:opacity-50"
                     style={{
                       background:
-                        uploading || uploadSuccess
-                          ? "#6B7280"
-                          : "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
-                      color: uploading || uploadSuccess ? "white" : "#111827",
+                        uploading || uploadSuccess ? "#6B7280" : "#3ab44c",
+                      // color: uploading || uploadSuccess ? "white" : "#111827",
                     }}
                     whileHover={
                       !uploading && !uploadSuccess ? { scale: 1.05 } : {}
@@ -984,9 +983,7 @@ export default function VideoRecorder({
                         ) : (
                           <Check size={20} />
                         )}
-                        {uploadAndProceed
-                          ? "Upload & Proceed"
-                          : "Submit Recording"}
+                        {uploadAndProceed ? "Upload" : "Submit"}
                       </>
                     )}
                   </motion.button>

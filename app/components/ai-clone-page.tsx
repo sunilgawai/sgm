@@ -13,9 +13,14 @@ import {
   Gift,
   Info,
   Pause,
+  Lock,
 } from "lucide-react";
 import Footer from "./footer";
 import ProcessFlowSection, { loadSession } from "./process-flow-section";
+import Image from "next/image";
+import { BsLockFill } from "react-icons/bs";
+import { PiLockFill } from "react-icons/pi";
+import { RiLockFill } from "react-icons/ri";
 
 function PurchaseModal({
   isOpen,
@@ -349,24 +354,36 @@ export default function AiClonePage() {
 
   const faqs = [
     {
-      q: "How do unlimited campaigns work?",
-      a: "We take full responsibility for planning, creating, launching, and optimizing your ads without any restrictions on the number of campaigns. Whether you need multiple projects for different communities, retargeting flows, or seasonal pushes — everything is included. Our team handles all strategy, creative direction, copywriting, audience testing, and ongoing refinements to ensure your campaigns consistently perform. You simply tell us your goals, and we execute.",
+      q: "Do I need to know anything about AI to take this course?",
+      a: "Nope. This course is beginner-friendly and walks you through everything step-by-step, even if you’ve never used an AI tool before.",
     },
     {
-      q: "Will the ads run from my Ads Manager?",
-      a: "Yes. All campaigns are launched directly from your own Meta Ads Manager for full transparency and control. This means: You retain 100% ownership of the data, You can monitor performance anytime, Budgets remain fully under your control. We only manage and optimize — you stay the account owner. We believe in absolute transparency — no hidden accounts or third-party setups.",
+      q: "What makes this different from all the free YouTube tutorials?",
+      a: "Most free content is outdated, shallow, or sponsored by tools that don’t work. This course shows you exactly how to use the best tools in real-world creator workflows.",
     },
     {
-      q: "Do I get full access to the CRM?",
-      a: "Absolutely. You maintain full ownership and access to the CRM. We help you integrate, automate, and structure the CRM so your leads flow in seamlessly real-time, and your team always knows what's happening. You can track: Every lead in real-time, Lead quality and status, Agent performance, Follow-ups and conversion reports. This ensures you have complete visibility over the pipeline at all times.",
+      q: "How Long Will It Take Me To Complete The Entire Course?",
+      a: "Luckily - you have options! Remember, you get lifetime access to the course so you can go at whatever pace you find best! We find that most people either: 1. Binger (1-2 Days): If you're like me and you prefer to binge great content like watching a great Netflix series... Then you can knock the entire course out in 1-2 days but make sure you aren't skipping the practice exercises to develop real skills! 2. Slow & Steady: If you prefer to take your time and learn at a slower pace, work through a lesson or two a day, along with the practice exercises. It will take you about a week to complete the course at this rate.",
     },
     {
-      q: "Can you help set up tracking and automations?",
-      a: "Yes. We fully handle your technical setup, including: Pixel + API installation, Lead routing, CRM integration, Automated follow-ups via SMS/WhatsApp/email, Custom dashboards. This ensures your system runs smoothly and every lead is captured and followed correctly.",
+      q: "Will I need expensive software or gear?",
+      a: "Nope. Most of the tools we teach are free or extremely affordable, and AI helps you create pro-level content even with minimal equipment.",
     },
     {
-      q: "What kind of reporting will I receive?",
-      a: "We provide transparent and easy-to-understand reports, including: Weekly performance summaries, Spend breakdown, Lead quality assessment, Campaign-level insights, Next-step recommendations.",
+      q: "Is this course only for YouTubers?",
+      a: "Not at all. While YouTube is a focus, the strategies also apply to short-form content (Reels, TikToks, Shorts), podcasts, business marketing content, and more.",
+    },
+    {
+      q: "What is signatureglobalmedia.com?",
+      a: "At ContentCreator.com, we believe there is a better way to learn online. Most online courses are surface-level. Instructors speak in abstract language about their process. Or, instructors guide you through overly simplified tutorials that don't match the real world. As a result, these courses can often feel shallow or disappointing. ContentCreator.com courses are different. We are pioneering a new way to learn online called Apprenticeship-Online Learning. In this approach, you learn like an apprentice, watching experts do what they do best. Your instructor brings you into their behind-the-scenes creative process from start to finish, explaining everything they are doing and thinking along the way. You get to (virtually) sit next to them in their studio and see everything -- every idea, decision, setback, tool, and technique -- out in the open, for real. All recorded as high-quality, on-demand video, allowing you to apprentice with the world's best anytime, anywhere. Apprenticeship (working and learning alongside an expert) has always been the best way to learn. It just hasn't been accessible to most people, until now.",
+    },
+    {
+      q: "Can I Take This Course From Anywhere?",
+      a: "Yes, the course is completely online so you can take the course from anywhere using any device. Learn from the comfort of your own home or take your course with you on the go.",
+    },
+    {
+      q: "Do I Get Lifetime Access To The Course?",
+      a: "How does lifetime access sound? After enrolling you have unlimited access to this program for as long as you like. You can go at your own pace. If you purchased the course but forgot your login info, simply email support@contentcreator.com and we'll be happy to help you!",
     },
   ];
 
@@ -843,63 +860,34 @@ export default function AiClonePage() {
               Join 500+ agents who are already using AI to dominate their market
             </p>
 
-            {/* Green Bonus Banner */}
-            <motion.div
-              className="relative bg-emerald-600 text-white rounded-xl px-6 py-6 md:py-8 mb-6 mx-auto max-w-2xl border-2 border-white/40 shadow-md"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              viewport={{ once: true }}
-            >
-              <div className="flex flex-col items-center justify-center">
-                <h3 className="text-sm sm:text-base md:text-lg font-normal uppercase tracking-wide mb-2">
-                  🎁 YOUR BONUS IS LOCKED IN!
-                </h3>
-                <div className="text-xs md:text-sm opacity-95 font-normal">
-                  SSL Encrypted Payment * 30 Day Refund
-                </div>
+            {/* Responsive Image */}
+            <div className="relative w-full max-w-3xl mx-auto mb-6">
+              <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+                <Image
+                  src="/sgm.png"
+                  alt="Responsive Image"
+                  className="absolute top-0 left-0 w-full h-full object-cover rounded-xl shadow-md"
+                  layout="fill"
+                />
               </div>
-            </motion.div>
-
-            {/* White pricing card */}
-            <motion.div
-              className="relative bg-white rounded-xl p-6 border shadow-md mb-6 mx-auto max-w-2xl"
-              style={{ borderColor: "#EBCB9A", borderWidth: 2 }}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
-            >
-              <div className="text-center" style={{ width: "100%" }}>
-                <div
-                  className="text-gray-900 text-xs sm:text-sm mb-3 font-normal"
-                  style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}
-                >
-                  Total Value: <span className="line-through">$2,085</span>
-                </div>
-
-                <div
-                  className="text-3xl sm:text-4xl md:text-5xl font-normal text-gray-900 mb-3 leading-none"
-                  style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}
-                >
-                  $37
-                </div>
-
-                <div
-                  className="text-emerald-600 font-normal text-xs sm:text-sm mb-3"
-                  style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}
-                >
-                  98% OFF – BLACK FRIDAY ONLY
-                </div>
-
-                <div
-                  className="text-gray-700 text-xs font-normal"
-                  style={{ fontFamily: "var(--font-unbounded)", width: "100%" }}
-                >
-                  Price Will Jump to $97 tonight
-                </div>
-              </div>
-            </motion.div>
+            </div>
+            <p className="text-4xl sm:text-lg md:text-xl font-medium text-gray-800 mb-6">
+              Don&apos;t forget, everything is backed by our{" "}
+              <strong>satisfaction guarantee!</strong>
+            </p>
+            <p className="flex items-center justify-center gap-2 text-sm sm:text-base md:text-lg font-bold text-gray-800 mb-4">
+              <RiLockFill />
+              <strong>Secure & Safe Checkout</strong>
+            </p>
+            <div className="flex items-center justify-center mb-6">
+              <Image
+              src="/payment-methods.webp"
+              height={80}
+              width={200}
+              alt="payment methods"
+              className="w-auto h-auto max-w-full max-h-full"
+              />
+            </div>
 
             {/* Gold pill CTA */}
             <motion.button
