@@ -871,7 +871,7 @@ export default function AiClonePage() {
                 />
               </div>
             </div>
-            <p className="text-4xl sm:text-lg md:text-xl font-medium text-gray-800 mb-6">
+            <p className="text-base sm:text-lg md:text-xl font-medium text-gray-800 mb-6">
               Don&apos;t forget, everything is backed by our{" "}
               <strong>satisfaction guarantee!</strong>
             </p>
