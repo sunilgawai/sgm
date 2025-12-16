@@ -444,6 +444,7 @@ export default function VideoRecorder({
 
       await ffmpeg.writeFile("input.webm", await fetchFile(inputBlob));
 
+      // Fast mode command
       await ffmpeg.exec([
         "-fflags",
         "+genpts+igndts",
@@ -458,34 +459,30 @@ export default function VideoRecorder({
         "-af",
         "aresample=async=1",
         "-vf",
-        "hqdn3d=4:3:6,deblock=alpha=0.1:beta=0.1,unsharp=5:5:1.0",
         "-c:v",
-        "libvpx-vp9",
+        "libx264",
+        "-preset",
+        "ultrafast",
         "-crf",
-        "18",
-        "-b:v",
-        "0",
+        "23",
         "-c:a",
-        "libopus",
+        "aac",
+        "-b:a",
+        "96k", // Lower for speed
+        "-movflags",
+        "+faststart",
         "-y",
-        "output.webm",
+        "output.mp4",
       ]);
 
-      const data = await ffmpeg.readFile("output.webm");
-      return new Blob([data.buffer], { type: "video/webm" });
+      const data = await ffmpeg.readFile("output.mp4");
+      return new Blob([data.buffer], { type: "video/mp4" });
     } catch (enhanceErr: any) {
       console.warn(
         "FFmpeg enhancement failed, falling back to raw blob:",
         enhanceErr
       );
-      if (ffmpeg) {
-        try {
-          await ffmpeg.deleteFile("input.webm");
-          if (await ffmpeg.exists("output.webm")) {
-            await ffmpeg.deleteFile("output.webm");
-          }
-        } catch {}
-      }
+      // ... cleanup
       return inputBlob;
     }
   };
@@ -548,9 +545,9 @@ export default function VideoRecorder({
     const timestamp = Date.now();
     const file = new File(
       [recordedBlobRef.current],
-      `recording-${timestamp}.webm`,
+      `recording-${timestamp}.mp4`,
       {
-        type: recordedBlobRef.current.type || "video/webm",
+        type: recordedBlobRef.current.type || "video/mp4",
         lastModified: timestamp,
       }
     );
@@ -789,9 +786,10 @@ export default function VideoRecorder({
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 1rem;
+                    font-size: 1.2rem;
                     color: white;
-                    white-space: nowrap;
+                    white-space: pre-wrap; 
+                    word-wrap: break-word; 
                     flex-shrink: 0;
                   }
                   `}</style>
@@ -803,13 +801,16 @@ export default function VideoRecorder({
                         }}
                       >
                         {teleprompterLines.map((line, index) => (
-                          <div key={index} className="line">
+                          <div key={index} className="line text-wrap">
                             {line}
                           </div>
                         ))}
                         {/* Repeat lines at the end to create seamless loop */}
                         {teleprompterLines.map((line, index) => (
-                          <div key={`repeat-${index}`} className="line">
+                          <div
+                            key={`repeat-${index}`}
+                            className="line text-wrap"
+                          >
                             {line}
                           </div>
                         ))}
@@ -836,7 +837,7 @@ export default function VideoRecorder({
             )}
 
             {/* Control Buttons */}
-            <div className="absolute bottom-12 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4 pb-safe">
+            <div className="absolute bottom-20 left-0 right-0 flex items-center justify-center gap-4 z-30 px-4 pb-safe">
               {!isRecording &&
                 countdown === null &&
                 !isProcessing &&
@@ -899,6 +900,7 @@ export default function VideoRecorder({
               src={recordedVideoUrl}
               controls
               className="w-full h-full object-contain"
+              // controlsList="nodownload noplaybackrate nofullscreen noremoteplayback nopicture-in-picture"
             />
 
             {/* Upload Progress Overlay */}
@@ -941,7 +943,7 @@ export default function VideoRecorder({
             )}
 
             {/* Playback Controls Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/90 to-transparent p-6 z-30 pb-safe">
+            <div className="absolute bottom-12 left-0 right-0 bg-transparent p-6 z-30 pb-safe">
               <div className="max-w-2xl mx-auto">
                 <p className="text-white text-center font-semibold text-lg mb-4">
                   Review Your Recording
@@ -950,13 +952,11 @@ export default function VideoRecorder({
                   <motion.button
                     onClick={handleSubmitRecording}
                     disabled={uploading || uploadSuccess}
-                    className="flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full font-bold text-base md:text-lg shadow-2xl disabled:opacity-50"
+                    className="flex items-center gap-2 text-white px-5 py-3 md:px-6 md:py-4 rounded-full font-semibold text-sm md:text-base shadow-2xl disabled:opacity-50"
                     style={{
                       background:
-                        uploading || uploadSuccess
-                          ? "#6B7280"
-                          : "linear-gradient(90deg,#10B981 0%, #059669 50%, #047857 100%)",
-                      color: uploading || uploadSuccess ? "white" : "#111827",
+                        uploading || uploadSuccess ? "#6B7280" : "#3ab44c",
+                      // color: uploading || uploadSuccess ? "white" : "#111827",
                     }}
                     whileHover={
                       !uploading && !uploadSuccess ? { scale: 1.05 } : {}
@@ -976,9 +976,7 @@ export default function VideoRecorder({
                         ) : (
                           <Check size={20} />
                         )}
-                        {uploadAndProceed
-                          ? "Upload & Proceed"
-                          : "Submit Recording"}
+                        {uploadAndProceed ? "Upload" : "Submit"}
                       </>
                     )}
                   </motion.button>
