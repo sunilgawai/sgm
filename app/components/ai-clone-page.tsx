@@ -864,9 +864,9 @@ export default function AiClonePage() {
             <div className="relative w-full max-w-3xl mx-auto mb-6">
               <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
                 <Image
-                  src="/sgm.png"
+                  src="/sgm.jpeg"
                   alt="Responsive Image"
-                  className="absolute top-0 left-0 w-full h-full object-cover rounded-xl shadow-md"
+                  className="absolute top-0 left-0 w-full h-full object-cover rounded-xl"
                   layout="fill"
                 />
               </div>
@@ -881,11 +881,11 @@ export default function AiClonePage() {
             </p>
             <div className="flex items-center justify-center mb-6">
               <Image
-              src="/payment-methods.webp"
-              height={80}
-              width={200}
-              alt="payment methods"
-              className="w-auto h-auto max-w-full max-h-full"
+                src="/payment-methods.webp"
+                height={80}
+                width={200}
+                alt="payment methods"
+                className="w-auto h-auto max-w-full max-h-full"
               />
             </div>
 
@@ -1270,6 +1270,17 @@ export default function AiClonePage() {
             support to help you make informed decisions with confidence.
           </motion.p>
           <FAQAccordion faqs={faqs} />
+        </div>
+        {/* Responsive Image */}
+        <div className="relative w-full max-w-4xl mx-auto">
+          <div className="relative w-full" style={{ paddingTop: "40%" }}>
+            <Image
+              src="/guarantee.png"
+              alt="Responsive Image"
+              className="absolute top-0 left-0 w-full h-full object-contain rounded-xl"
+              layout="fill"
+            />
+          </div>
         </div>
       </section>
 
