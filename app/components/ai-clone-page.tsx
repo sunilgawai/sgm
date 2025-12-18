@@ -617,8 +617,9 @@ export default function AiClonePage() {
                 colorText: "text-white",
                 list: [
                   "No Subscription Fees",
-                  "Get your AI Avatar Clone (With Voice, Facial Expression & Body Language Cloning)",
                   "No skills needed",
+                  "Get your AI Avatar Clone (With Voice, Facial Expression & Body Language Cloning)",
+                  "Free Lifetime AI Creator Course",
                   "Get one free video of your AI Avatar with your script/prompt & post it on any Social Media Channel",
                 ],
                 footer: (
