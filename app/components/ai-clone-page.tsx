@@ -375,7 +375,7 @@ export default function AiClonePage() {
     },
     {
       q: "What is signatureglobalmedia.com?",
-      a: "At ContentCreator.com, we believe there is a better way to learn online. Most online courses are surface-level. Instructors speak in abstract language about their process. Or, instructors guide you through overly simplified tutorials that don't match the real world. As a result, these courses can often feel shallow or disappointing. ContentCreator.com courses are different. We are pioneering a new way to learn online called Apprenticeship-Online Learning. In this approach, you learn like an apprentice, watching experts do what they do best. Your instructor brings you into their behind-the-scenes creative process from start to finish, explaining everything they are doing and thinking along the way. You get to (virtually) sit next to them in their studio and see everything -- every idea, decision, setback, tool, and technique -- out in the open, for real. All recorded as high-quality, on-demand video, allowing you to apprentice with the world's best anytime, anywhere. Apprenticeship (working and learning alongside an expert) has always been the best way to learn. It just hasn't been accessible to most people, until now.",
+      a: "At signatureglobalmedia.com, we believe there is a better way to learn online. Most online courses are surface-level. Instructors speak in abstract language about their process. Or, instructors guide you through overly simplified tutorials that don't match the real world. As a result, these courses can often feel shallow or disappointing. signatureglobalmedia.com courses are different. We are pioneering a new way to learn online called Apprenticeship-Online Learning. In this approach, you learn like an apprentice, watching experts do what they do best. Your instructor brings you into their behind-the-scenes creative process from start to finish, explaining everything they are doing and thinking along the way. You get to (virtually) sit next to them in their studio and see everything -- every idea, decision, setback, tool, and technique -- out in the open, for real. All recorded as high-quality, on-demand video, allowing you to apprentice with the world's best anytime, anywhere. Apprenticeship (working and learning alongside an expert) has always been the best way to learn. It just hasn't been accessible to most people, until now.",
     },
     {
       q: "Can I Take This Course From Anywhere?",
@@ -383,7 +383,7 @@ export default function AiClonePage() {
     },
     {
       q: "Do I Get Lifetime Access To The Course?",
-      a: "How does lifetime access sound? After enrolling you have unlimited access to this program for as long as you like. You can go at your own pace. If you purchased the course but forgot your login info, simply email support@contentcreator.com and we'll be happy to help you!",
+      a: "How does lifetime access sound? After enrolling you have unlimited access to this program for as long as you like. You can go at your own pace. If you purchased the course but forgot your login info, simply email business@signatureglobalmedia.com and we'll be happy to help you!",
     },
   ];
 
@@ -573,7 +573,7 @@ export default function AiClonePage() {
             {[
               {
                 title: "OLD WAY",
-                price: "$500",
+                price: "$2500",
                 tag: "Expensive",
                 icon: XIcon,
                 colorText: "text-gray-900",
@@ -624,7 +624,7 @@ export default function AiClonePage() {
                 ],
                 footer: (
                   <>
-                    You save: <span className="font-semibold">$24,963!</span>
+                    You save: <span className="font-semibold">$5000!</span>
                   </>
                 ),
                 highlight: true,
@@ -1018,7 +1018,6 @@ export default function AiClonePage() {
                       "Reels Scripting & Creative Direction",
                       "Capture of up to 5 AI Avatar Clones (With Voice, Facial Expression & Body Language Cloning)",
                       "15 Reels included (professionally edited)",
-                      "Social media management included",
                     ].map((item, i) => (
                       <li
                         key={i}
