@@ -581,11 +581,11 @@ export default function AiClonePage() {
                   "Wait for scheduling",
                   "Travel to location",
                   "Expensive equipment",
-                  "Revision fees",
+                  "Video edits and revision takes long time",
                 ],
                 footer: (
                   <>
-                    50 videos ={" "}
+                    {/* 50 videos ={" "} */}
                     <span className="text-[#C89356] font-semibold">
                       $25,000
                     </span>
@@ -865,7 +865,7 @@ export default function AiClonePage() {
             <div className="relative w-full max-w-3xl mx-auto mb-6">
               <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
                 <Image
-                  src="/sgm.jpeg"
+                  src="/sgm.jpg"
                   alt="Responsive Image"
                   className="absolute top-0 left-0 w-full h-full object-cover rounded-xl"
                   layout="fill"
